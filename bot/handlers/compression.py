@@ -37,7 +37,14 @@ async def compress_video_start(update: Update, context: ContextTypes.DEFAULT_TYP
         "Видео будет автоматически сжато с оптимальным битрейтом."
     )
 
-    await query.edit_message_text(
+    
+    # Delete menu message
+    try:
+        await query.message.delete()
+    except Exception as e:
+        logger.warning(f"Failed to delete menu message: {e}")
+
+    await query.message.reply_text(
         text=text,
         reply_markup=get_back_to_menu_keyboard()
     )

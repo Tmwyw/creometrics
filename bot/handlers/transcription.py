@@ -39,7 +39,14 @@ async def transcribe_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         "⚠️ Обработка может занять несколько минут для длинных видео."
     )
 
-    await query.edit_message_text(
+    
+    # Delete menu message
+    try:
+        await query.message.delete()
+    except Exception as e:
+        logger.warning(f"Failed to delete menu message: {e}")
+
+    await query.message.reply_text(
         text=text,
         reply_markup=get_back_to_menu_keyboard()
     )

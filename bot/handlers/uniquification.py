@@ -32,13 +32,20 @@ async def unique_photo_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not await subscription_required(update, context):
         return ConversationHandler.END
 
+    # Delete menu message
+    try:
+        await query.message.delete()
+    except Exception as e:
+        logger.warning(f"Failed to delete menu message: {e}")
+
     text = (
         "📸 Уникализация фото\n\n"
         "Отправьте фото, которое нужно уникализировать.\n"
         "Поддерживаются форматы: JPG, PNG, WEBP"
     )
 
-    await query.edit_message_text(
+    # Send new message
+    await query.message.reply_text(
         text=text,
         reply_markup=get_back_to_menu_keyboard()
     )
@@ -200,6 +207,12 @@ async def unique_video_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
     if not await subscription_required(update, context):
         return ConversationHandler.END
 
+    # Delete menu message
+    try:
+        await query.message.delete()
+    except Exception as e:
+        logger.warning(f"Failed to delete menu message: {e}")
+
     text = (
         "🎬 Уникализация видео\n\n"
         "Отправьте видео, которое нужно уникализировать.\n"
@@ -207,7 +220,7 @@ async def unique_video_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"Максимальный размер: {settings.MAX_VIDEO_SIZE_MB} MB"
     )
 
-    await query.edit_message_text(
+    await query.message.reply_text(
         text=text,
         reply_markup=get_back_to_menu_keyboard()
     )

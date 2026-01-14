@@ -37,7 +37,14 @@ async def mp3_to_voice_start(update: Update, context: ContextTypes.DEFAULT_TYPE)
         f"Максимальный размер: {settings.MAX_AUDIO_SIZE_MB} MB"
     )
 
-    await query.edit_message_text(
+    
+    # Delete menu message
+    try:
+        await query.message.delete()
+    except Exception as e:
+        logger.warning(f"Failed to delete menu message: {e}")
+
+    await query.message.reply_text(
         text=text,
         reply_markup=get_back_to_menu_keyboard()
     )
@@ -148,7 +155,14 @@ async def video_to_circle_start(update: Update, context: ContextTypes.DEFAULT_TY
         "Видео будет автоматически обрезано до квадрата."
     )
 
-    await query.edit_message_text(
+    
+    # Delete menu message
+    try:
+        await query.message.delete()
+    except Exception as e:
+        logger.warning(f"Failed to delete menu message: {e}")
+
+    await query.message.reply_text(
         text=text,
         reply_markup=get_back_to_menu_keyboard()
     )
