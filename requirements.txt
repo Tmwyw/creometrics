@@ -14,7 +14,7 @@ redis==5.0.1
 # Media Processing
 Pillow==10.2.0
 moviepy==1.0.3
-opencv-python==4.9.0.80
+opencv-python-headless==4.9.0.80
 
 # Audio/Video Processing
 ffmpeg-python==0.2.0
