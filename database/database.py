@@ -1,11 +1,17 @@
 """Database connection and session management."""
 
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
 
 from config.settings import settings
+
+# Debug: Print DATABASE_URL to see what we're getting
+print(f"[DEBUG] DATABASE_URL from env: {os.getenv('DATABASE_URL', 'NOT_SET')[:50]}...")
+print(f"[DEBUG] DATABASE_URL from settings: {settings.DATABASE_URL[:50] if settings.DATABASE_URL else 'EMPTY'}...")
+print(f"[DEBUG] RAILWAY_ENVIRONMENT: {os.getenv('RAILWAY_ENVIRONMENT', 'NOT_SET')}")
 
 # Create database engine
 engine = create_engine(
