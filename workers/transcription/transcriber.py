@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 class VideoTranscriber:
     """Video transcription engine using Whisper."""
 
-    def __init__(self, model_size: str = "base", use_faster_whisper: bool = True):
+    def __init__(self, model_size: str = "base", use_faster_whisper: bool = False):
         """Initialize transcriber.
 
         Args:
