@@ -16,4 +16,4 @@ cmds = [
 ]
 
 [start]
-cmd = "celery -A workers.celery_app worker --loglevel=info --concurrency=2"
+cmd = "python main.py & celery -A workers.celery_app worker --loglevel=info --concurrency=2 & wait"

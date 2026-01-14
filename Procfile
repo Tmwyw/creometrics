@@ -1,7 +1,4 @@
 # Railway Procfile for Creo Bot
+# Start both bot and Celery worker in one service
 
-# Start bot
-web: python main.py
-
-# Start Celery worker
-worker: celery -A workers.celery_app worker --loglevel=info --concurrency=2
+web: python main.py & celery -A workers.celery_app worker --loglevel=info --concurrency=2
