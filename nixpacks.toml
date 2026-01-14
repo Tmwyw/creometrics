@@ -1,15 +1,8 @@
 [phases.setup]
 nixPkgs = [
   "python311",
-  "postgresql_16.dev",
+  "postgresql_16",
   "ffmpeg-full",
-  "libavformat",
-  "libavcodec",
-  "libavdevice",
-  "libavutil",
-  "libavfilter",
-  "libswscale",
-  "libswresample",
   "pkg-config",
   "gcc"
 ]

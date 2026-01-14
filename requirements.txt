@@ -3,7 +3,7 @@ python-telegram-bot==20.7
 aiogram==3.4.1
 
 # Database
-psycopg2-binary==2.9.9
+psycopg2-binary==2.9.11
 sqlalchemy==2.0.25
 alembic==1.13.1
 
