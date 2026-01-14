@@ -65,17 +65,24 @@ async def error_handler(update: object, context) -> None:
 
 def main():
     """Start the bot."""
+    print("[MAIN] Bot main() function started")
     try:
         # Validate settings
+        print("[MAIN] Validating settings...")
         settings.validate()
+        print("[MAIN] Settings validated successfully")
 
         # Initialize database
+        print("[MAIN] Initializing database...")
         logger.info("Initializing database...")
         init_db()
+        print("[MAIN] Database initialized successfully")
 
         # Create application
+        print("[MAIN] Creating bot application...")
         logger.info("Creating bot application...")
         application = Application.builder().token(settings.BOT_TOKEN).build()
+        print("[MAIN] Application created successfully")
 
         # Add handlers
         logger.info("Adding handlers...")
@@ -193,14 +200,20 @@ def main():
         application.add_error_handler(error_handler)
 
         # Start bot
+        print("[MAIN] Starting bot polling...")
         logger.info("Starting bot...")
         logger.info(f"Bot ready! Token: {settings.BOT_TOKEN[:10]}...")
+        print(f"[MAIN] Bot is now running! Token: {settings.BOT_TOKEN[:10]}...")
         application.run_polling(allowed_updates=Update.ALL_TYPES)
 
     except Exception as e:
+        print(f"[MAIN] ERROR: Failed to start bot: {e}")
         logger.error(f"Failed to start bot: {e}")
+        import traceback
+        traceback.print_exc()
         raise
 
 
 if __name__ == '__main__':
+    print("[MAIN] Starting CreoMetrics Bot...")
     main()

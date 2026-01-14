@@ -16,16 +16,4 @@ cmds = [
 ]
 
 [start]
-cmd = """
-echo "[RAILWAY] Starting bot and Celery worker..."
-python main.py 2>&1 | sed 's/^/[BOT] /' &
-BOT_PID=$!
-sleep 2
-celery -A workers.celery_app worker --loglevel=info --concurrency=2 2>&1 | sed 's/^/[CELERY] /' &
-CELERY_PID=$!
-echo "[RAILWAY] Bot PID: $BOT_PID, Celery PID: $CELERY_PID"
-wait -n
-EXIT_CODE=$?
-echo "[RAILWAY] One of the processes exited with code $EXIT_CODE"
-exit $EXIT_CODE
-"""
+cmd = "python main.py & celery -A workers.celery_app worker --loglevel=info --concurrency=2 & wait"
