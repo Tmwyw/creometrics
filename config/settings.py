@@ -5,8 +5,10 @@ from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from .env file only in development
+# Railway provides environment variables directly, no .env file needed
+if os.getenv("RAILWAY_ENVIRONMENT") is None:
+    load_dotenv()
 
 # Base directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,8 +46,9 @@ class Settings:
     REDIS_DB: int = int(os.getenv("REDIS_DB", "0"))
 
     # Celery
-    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
-    CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/1")
+    # Railway sets REDIS_URL, use it for both broker and backend if CELERY_* vars not set
+    CELERY_BROKER_URL: str = os.getenv("CELERY_BROKER_URL") or os.getenv("REDIS_URL", "redis://localhost:6379/0")
+    CELERY_RESULT_BACKEND: str = os.getenv("CELERY_RESULT_BACKEND") or os.getenv("REDIS_URL", "redis://localhost:6379/0").replace("/0", "/1")
 
     # File Limits (in MB)
     MAX_PHOTO_SIZE_MB: int = int(os.getenv("MAX_PHOTO_SIZE_MB", "20"))
