@@ -1,0 +1,72 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.venv
+
+# Environment Variables
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Project specific
+temp/
+logs/*.log
+*.db
+*.sqlite3
+
+# Media files (temporary)
+*.mp4
+*.mp3
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.webp
+*.ogg
+*.oga
+
+# Keep placeholder directory but ignore content
+assets/placeholders/*
+!assets/placeholders/.gitkeep
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# Database
+*.sql
+migrations/versions/*.py
+!migrations/versions/__init__.py

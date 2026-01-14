@@ -1,0 +1,41 @@
+# Telegram Bot
+python-telegram-bot==20.7
+aiogram==3.4.1
+
+# Database
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.25
+alembic==1.13.1
+
+# Task Queue
+celery==5.3.6
+redis==5.0.1
+
+# Media Processing
+Pillow==10.2.0
+moviepy==1.0.3
+opencv-python==4.9.0.80
+
+# Audio/Video Processing
+ffmpeg-python==0.2.0
+pydub==0.25.1
+
+# Transcription (free alternatives)
+openai-whisper==20231117
+faster-whisper==0.10.0
+
+# Translation
+deep-translator==1.11.4
+googletrans==4.0.0rc1
+
+# Video Download
+yt-dlp==2024.3.10
+
+# Utils
+python-dotenv==1.0.1
+requests==2.31.0
+aiohttp==3.9.3
+python-magic==0.4.27
+
+# Monitoring
+sentry-sdk==1.40.6
