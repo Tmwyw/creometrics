@@ -193,7 +193,6 @@ def main():
         application.add_handler(CallbackQueryHandler(admin_logs, pattern="^admin_logs$"))
 
         # Subscription check callback
-        from bot.handlers.start import start_command
         application.add_handler(CallbackQueryHandler(start_command, pattern="^check_subscription$"))
 
         # ============== ERROR HANDLER ==============
