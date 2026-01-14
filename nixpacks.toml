@@ -16,4 +16,22 @@ cmds = [
 ]
 
 [start]
-cmd = "python main.py & celery -A workers.celery_app worker --loglevel=info --concurrency=2 & wait"
+cmd = """
+#!/bin/bash
+set -e
+echo "=== Testing bot imports ==="
+python -c "import main; print('Imports OK')" || { echo "Import failed!"; exit 1; }
+echo "=== Starting bot and Celery ==="
+python main.py 2>&1 &
+BOT_PID=$!
+echo "Bot PID: $BOT_PID"
+sleep 3
+echo "=== Starting Celery ==="
+celery -A workers.celery_app worker --loglevel=info --concurrency=2 2>&1 &
+CELERY_PID=$!
+echo "Celery PID: $CELERY_PID"
+wait -n
+EXIT_CODE=$?
+echo "Process exited with code $EXIT_CODE"
+exit $EXIT_CODE
+"""
