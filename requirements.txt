@@ -20,8 +20,8 @@ opencv-python==4.9.0.80
 ffmpeg-python==0.2.0
 pydub==0.25.1
 
-# Transcription (free alternatives)
-openai-whisper==20231117
+# Transcription (free alternatives) - TEMPORARILY DISABLED
+# openai-whisper==20231117  # TODO: Re-enable after Railway deployment
 # faster-whisper==0.10.0  # Disabled due to av build issues on Railway
 
 # Translation

@@ -1,20 +1,17 @@
-"""Video transcription utilities using Whisper."""
+"""Video transcription utilities using Whisper.
+
+TEMPORARILY DISABLED: Transcription is stubbed out for Railway deployment.
+Will be re-enabled after successful deployment.
+"""
 
 import logging
 from pathlib import Path
 from typing import Dict, Optional
 import subprocess
-from deep_translator import GoogleTranslator
 
-try:
-    import whisper
-except ImportError:
-    whisper = None
-
-try:
-    from faster_whisper import WhisperModel
-except ImportError:
-    WhisperModel = None
+# Whisper imports temporarily disabled
+whisper = None
+WhisperModel = None
 
 logger = logging.getLogger(__name__)
 
@@ -30,17 +27,10 @@ class VideoTranscriber:
             use_faster_whisper: Use faster-whisper if available (faster, less memory)
         """
         self.model_size = model_size
-        self.use_faster_whisper = use_faster_whisper and WhisperModel is not None
+        self.use_faster_whisper = False
+        self.model = None
 
-        # Load model
-        if self.use_faster_whisper:
-            logger.info(f"Loading faster-whisper model: {model_size}")
-            self.model = WhisperModel(model_size, device="cpu", compute_type="int8")
-        elif whisper is not None:
-            logger.info(f"Loading whisper model: {model_size}")
-            self.model = whisper.load_model(model_size)
-        else:
-            raise ImportError("Neither whisper nor faster-whisper is installed")
+        logger.warning("Transcription is temporarily disabled (stub mode)")
 
     def transcribe_video(
         self,
@@ -58,125 +48,22 @@ class VideoTranscriber:
         Returns:
             Dictionary with 'original' and 'russian' transcriptions
         """
-        logger.info(f"Transcribing video: {video_path.name}")
+        logger.warning(f"Transcription requested for {video_path.name}, but feature is temporarily disabled")
 
-        try:
-            # Extract audio from video
-            audio_path = self._extract_audio(video_path)
-
-            # Transcribe
-            if self.use_faster_whisper:
-                result = self._transcribe_faster_whisper(audio_path, language)
-            else:
-                result = self._transcribe_whisper(audio_path, language)
-
-            transcription = result['text']
-            detected_language = result.get('language', 'unknown')
-
-            logger.info(f"Transcribed {len(transcription)} characters, language: {detected_language}")
-
-            # Translate if needed and not already in Russian
-            russian_transcription = transcription
-            if translate_to_russian and detected_language != 'ru':
-                logger.info("Translating to Russian...")
-                russian_transcription = self._translate_to_russian(transcription, detected_language)
-
-            # Clean up audio file
-            audio_path.unlink(missing_ok=True)
-
-            return {
-                'original': transcription,
-                'russian': russian_transcription,
-                'language': detected_language
-            }
-
-        except Exception as e:
-            logger.error(f"Error transcribing video: {e}")
-            raise
-
-    def _extract_audio(self, video_path: Path) -> Path:
-        """Extract audio from video.
-
-        Args:
-            video_path: Path to video file
-
-        Returns:
-            Path to extracted audio file
-        """
-        audio_path = video_path.with_suffix('.wav')
-
-        cmd = [
-            'ffmpeg',
-            '-i', str(video_path),
-            '-vn',  # No video
-            '-acodec', 'pcm_s16le',  # PCM 16-bit
-            '-ar', '16000',  # 16kHz sample rate
-            '-ac', '1',  # Mono
-            '-y',  # Overwrite
-            str(audio_path)
-        ]
-
-        subprocess.run(cmd, capture_output=True, check=True)
-        return audio_path
-
-    def _transcribe_whisper(self, audio_path: Path, language: Optional[str]) -> Dict[str, str]:
-        """Transcribe using original Whisper."""
-        result = self.model.transcribe(
-            str(audio_path),
-            language=language,
-            fp16=False,  # Use FP32 on CPU
-            verbose=False
+        # STUB: Return placeholder text
+        stub_text = (
+            "⚠️ Функция транскрипции временно отключена.\n"
+            "Transcription feature is temporarily disabled.\n\n"
+            "Эта функция будет активирована после успешного деплоя на Railway."
         )
 
         return {
-            'text': result['text'].strip(),
-            'language': result.get('language', 'unknown')
+            'original': stub_text,
+            'russian': stub_text,
+            'language': 'stub'
         }
 
-    def _transcribe_faster_whisper(self, audio_path: Path, language: Optional[str]) -> Dict[str, str]:
-        """Transcribe using faster-whisper."""
-        segments, info = self.model.transcribe(
-            str(audio_path),
-            language=language,
-            beam_size=5,
-            vad_filter=True  # Voice activity detection
-        )
-
-        # Combine segments
-        text = ' '.join([segment.text for segment in segments]).strip()
-
-        return {
-            'text': text,
-            'language': info.language
-        }
-
-    def _translate_to_russian(self, text: str, source_lang: str) -> str:
-        """Translate text to Russian.
-
-        Args:
-            text: Text to translate
-            source_lang: Source language code
-
-        Returns:
-            Translated text
-        """
-        try:
-            # Split text into chunks (Google Translator has size limits)
-            max_chunk_size = 4000
-            chunks = [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
-
-            translated_chunks = []
-            translator = GoogleTranslator(source=source_lang, target='ru')
-
-            for chunk in chunks:
-                translated = translator.translate(chunk)
-                translated_chunks.append(translated)
-
-            return ' '.join(translated_chunks)
-
-        except Exception as e:
-            logger.error(f"Error translating to Russian: {e}")
-            return text  # Return original if translation fails
+    # Helper methods disabled in stub mode
 
 
 # Global transcriber instance
