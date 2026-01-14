@@ -11,6 +11,7 @@ from telegram.error import TelegramError
 from config.settings import settings
 from utils.file_helpers import cleanup_files
 from workers.celery_app import celery_app
+from bot.keyboards import get_back_to_menu_keyboard
 
 logger = logging.getLogger(__name__)
 
@@ -159,7 +160,8 @@ class TaskManager:
         # Final message
         await self.bot.send_message(
             chat_id=chat_id,
-            text=f"✅ Все {len(output_paths)} копий отправлены!"
+            text=f"✅ Все {len(output_paths)} копий отправлены!",
+            reply_markup=get_back_to_menu_keyboard()
         )
 
     async def _send_uniquified_videos(self, chat_id: int, message_id: int, result: dict) -> None:
@@ -196,7 +198,8 @@ class TaskManager:
 
         await self.bot.send_message(
             chat_id=chat_id,
-            text=f"✅ Все {len(output_paths)} копий отправлены!"
+            text=f"✅ Все {len(output_paths)} копий отправлены!",
+            reply_markup=get_back_to_menu_keyboard()
         )
 
     async def _send_voice(self, chat_id: int, message_id: int, result: dict) -> None:
@@ -220,7 +223,8 @@ class TaskManager:
 
             await self.bot.send_message(
                 chat_id=chat_id,
-                text="✅ Голосовое сообщение готово!"
+                text="✅ Голосовое сообщение готово!",
+                reply_markup=get_back_to_menu_keyboard()
             )
         except Exception as e:
             logger.error(f"Error sending voice: {e}")
@@ -247,7 +251,8 @@ class TaskManager:
 
             await self.bot.send_message(
                 chat_id=chat_id,
-                text="✅ Видеосообщение готово!"
+                text="✅ Видеосообщение готово!",
+                reply_markup=get_back_to_menu_keyboard()
             )
         except Exception as e:
             logger.error(f"Error sending video note: {e}")
@@ -276,7 +281,8 @@ class TaskManager:
 
             await self.bot.send_message(
                 chat_id=chat_id,
-                text="✅ Видео сжато успешно!"
+                text="✅ Видео сжато успешно!",
+                reply_markup=get_back_to_menu_keyboard()
             )
         except Exception as e:
             logger.error(f"Error sending compressed video: {e}")
@@ -326,7 +332,8 @@ class TaskManager:
 
             await self.bot.send_message(
                 chat_id=chat_id,
-                text="✅ Видео скачано успешно!"
+                text="✅ Видео скачано успешно!",
+                reply_markup=get_back_to_menu_keyboard()
             )
         except Exception as e:
             logger.error(f"Error sending downloaded video: {e}")
