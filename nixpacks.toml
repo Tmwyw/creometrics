@@ -3,6 +3,7 @@ nixPkgs = [
   "python311",
   "postgresql_16",
   "ffmpeg-full",
+  "ffmpeg-full.dev",
   "pkg-config",
   "gcc"
 ]
