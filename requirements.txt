@@ -26,7 +26,7 @@ pydub==0.25.1
 
 # Translation
 deep-translator==1.11.4
-googletrans==4.0.0rc1
+# googletrans==4.0.0rc1  # Conflicts with python-telegram-bot's httpx version
 
 # Video Download
 yt-dlp==2024.3.10
