@@ -190,7 +190,7 @@ def main():
         application.add_handler(CallbackQueryHandler(start_command, pattern="^check_subscription$"))
 
         # ============== ERROR HANDLER ==============
-        application.add_handler(error_handler)
+        application.add_error_handler(error_handler)
 
         # Start bot
         logger.info("Starting bot...")
