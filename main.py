@@ -16,14 +16,14 @@ from config.settings import settings
 from database import init_db
 from bot.handlers.start import start_command, menu_callback
 from bot.handlers.uniquification import (
-    unique_photo_start, receive_photo, select_copies_count,
+    unique_photo_start, receive_photo, select_copies_count, select_intensity,
     select_file_format, select_flip_choice, select_text_choice, receive_text_input,
     select_overlay_choice, receive_overlay_photo, select_overlay_position, receive_overlay_opacity,
     process_photo_uniquification,
     unique_video_start, receive_video, process_video_uniquification,
     WAITING_FOR_PHOTO, WAITING_FOR_PHOTO_COPIES,
     WAITING_FOR_VIDEO, WAITING_FOR_VIDEO_COPIES,
-    WAITING_FOR_FILE_FORMAT, WAITING_FOR_FLIP_CHOICE, WAITING_FOR_TEXT_CHOICE,
+    WAITING_FOR_INTENSITY, WAITING_FOR_FILE_FORMAT, WAITING_FOR_FLIP_CHOICE, WAITING_FOR_TEXT_CHOICE,
     WAITING_FOR_TEXT_INPUT, WAITING_FOR_OVERLAY_CHOICE, WAITING_FOR_OVERLAY_PHOTO,
     WAITING_FOR_OVERLAY_POSITION, WAITING_FOR_OVERLAY_OPACITY
 )
@@ -105,6 +105,7 @@ def main():
             states={
                 WAITING_FOR_PHOTO: [MessageHandler(filters.PHOTO, receive_photo)],
                 WAITING_FOR_PHOTO_COPIES: [CallbackQueryHandler(select_copies_count, pattern="^copies_")],
+                WAITING_FOR_INTENSITY: [CallbackQueryHandler(select_intensity, pattern="^intensity_")],
                 WAITING_FOR_FILE_FORMAT: [CallbackQueryHandler(select_file_format, pattern="^format_")],
                 WAITING_FOR_FLIP_CHOICE: [CallbackQueryHandler(select_flip_choice, pattern="^answer_")],
                 WAITING_FOR_TEXT_CHOICE: [CallbackQueryHandler(select_text_choice, pattern="^answer_")],

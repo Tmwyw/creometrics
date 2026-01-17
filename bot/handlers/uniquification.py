@@ -12,6 +12,7 @@ from bot.keyboards import (
     get_back_to_menu_keyboard,
     get_file_format_keyboard,
     get_yes_no_keyboard,
+    get_intensity_keyboard,
     get_overlay_position_keyboard,
 )
 from bot.middlewares import subscription_required
@@ -27,14 +28,15 @@ WAITING_FOR_PHOTO = 1
 WAITING_FOR_PHOTO_COPIES = 2
 WAITING_FOR_VIDEO = 3
 WAITING_FOR_VIDEO_COPIES = 4
-WAITING_FOR_FILE_FORMAT = 5
-WAITING_FOR_FLIP_CHOICE = 6
-WAITING_FOR_TEXT_CHOICE = 7
-WAITING_FOR_TEXT_INPUT = 8
-WAITING_FOR_OVERLAY_CHOICE = 9
-WAITING_FOR_OVERLAY_PHOTO = 10
-WAITING_FOR_OVERLAY_POSITION = 11
-WAITING_FOR_OVERLAY_OPACITY = 12
+WAITING_FOR_INTENSITY = 5
+WAITING_FOR_FILE_FORMAT = 6
+WAITING_FOR_FLIP_CHOICE = 7
+WAITING_FOR_TEXT_CHOICE = 8
+WAITING_FOR_TEXT_INPUT = 9
+WAITING_FOR_OVERLAY_CHOICE = 10
+WAITING_FOR_OVERLAY_PHOTO = 11
+WAITING_FOR_OVERLAY_POSITION = 12
+WAITING_FOR_OVERLAY_OPACITY = 13
 
 
 async def unique_photo_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -116,6 +118,31 @@ async def select_copies_count(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     # Store copies count in context
     context.user_data['copies_count'] = copies_count
+
+    # Ask for intensity
+    await query.edit_message_text(
+        "⚡ Выберите интенсивность уникализации:\n\n"
+        "🟢 Слабая — минимальные незаметные изменения\n"
+        "🟡 Средняя — умеренные изменения\n"
+        "🔴 Сильная — максимальные изменения",
+        reply_markup=get_intensity_keyboard()
+    )
+
+    return WAITING_FOR_INTENSITY
+
+
+async def select_intensity(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select uniquification intensity."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get intensity from callback
+    intensity = query.data.split('_')[1]  # low, medium, high
+    context.user_data['intensity'] = intensity
 
     # Ask for file format
     await query.edit_message_text(
@@ -334,6 +361,7 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
 
     # Get all parameters from context
     copies_count = context.user_data.get('copies_count')
+    intensity = context.user_data.get('intensity', 'low')
     file_id = context.user_data.get('photo_file_id')
     file_size = context.user_data.get('photo_file_size', 0)
     file_format = context.user_data.get('file_format', 'jpeg')
@@ -429,6 +457,7 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
             input_file_path=str(file_path),
             copies_count=copies_count,
             preset_id=preset.id,
+            intensity=intensity,
             file_format=file_format,
             flip_horizontal=flip_horizontal,
             overlay_text=overlay_text,

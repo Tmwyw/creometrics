@@ -1,0 +1,20 @@
+#!/bin/bash
+# Quick script to check environment variables in Railway
+
+echo "=== Railway Environment Check ==="
+echo ""
+echo "RAILWAY_ENVIRONMENT: ${RAILWAY_ENVIRONMENT:-NOT_SET}"
+echo "BOT_TOKEN: ${BOT_TOKEN:0:15}... (${#BOT_TOKEN} chars)"
+echo "ADMIN_USER_IDS: ${ADMIN_USER_IDS:-NOT_SET}"
+echo "DATABASE_URL: ${DATABASE_URL:0:30}... (${#DATABASE_URL} chars)"
+echo "REDIS_URL: ${REDIS_URL:0:30}... (${#REDIS_URL} chars)"
+echo ""
+echo "=== All RAILWAY_* variables ==="
+env | grep RAILWAY || echo "No RAILWAY_* variables found"
+echo ""
+echo "=== All POSTGRES_* variables ==="
+env | grep POSTGRES || echo "No POSTGRES_* variables found"
+echo ""
+echo "=== All REDIS_* variables ==="
+env | grep REDIS || echo "No REDIS_* variables found"
+echo ""

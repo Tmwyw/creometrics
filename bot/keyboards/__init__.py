@@ -9,6 +9,7 @@ from .main_keyboards import (
     get_admin_menu_keyboard,
     get_file_format_keyboard,
     get_yes_no_keyboard,
+    get_intensity_keyboard,
     get_overlay_position_keyboard,
 )
 
@@ -21,5 +22,6 @@ __all__ = [
     'get_admin_menu_keyboard',
     'get_file_format_keyboard',
     'get_yes_no_keyboard',
+    'get_intensity_keyboard',
     'get_overlay_position_keyboard',
 ]

@@ -20,6 +20,7 @@ def uniquify_photo_task(
     input_file_path: str,
     copies_count: int,
     preset_id: int,
+    intensity: str = 'low',
     file_format: str = 'jpeg',
     flip_horizontal: bool = False,
     overlay_text: str = None,
@@ -67,6 +68,7 @@ def uniquify_photo_task(
 
         # Create uniquifier with additional options
         config = preset.config.copy()
+        config['intensity'] = intensity
         config['file_format'] = file_format
         config['flip_horizontal'] = flip_horizontal
         if overlay_text:

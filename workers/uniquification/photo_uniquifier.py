@@ -21,7 +21,8 @@ class PhotoUniquifier:
             preset_config: Preset configuration with methods and parameters
         """
         self.preset_config = preset_config
-        self.methods = preset_config.get('methods', [])
+        self.intensity = preset_config.get('intensity', 'low')
+        self.methods = self._apply_intensity_multiplier(preset_config.get('methods', []))
         self.file_format = preset_config.get('file_format', 'jpeg')
         self.flip_horizontal = preset_config.get('flip_horizontal', False)
         self.overlay_text = preset_config.get('overlay_text')
@@ -105,13 +106,13 @@ class PhotoUniquifier:
                 # Save result
                 output_path = output_dir / f"{input_path.stem}_unique_{i+1}{ext}"
 
-                # Save with appropriate format
+                # Save with appropriate format WITHOUT metadata
                 if self.file_format == 'jpeg':
-                    image.save(output_path, 'JPEG', quality=95)
+                    image.save(output_path, 'JPEG', quality=95, exif=b'')
                 elif self.file_format == 'png':
-                    image.save(output_path, 'PNG')
+                    image.save(output_path, 'PNG', exif=b'')
                 elif self.file_format == 'webp':
-                    image.save(output_path, 'WEBP', quality=95)
+                    image.save(output_path, 'WEBP', quality=95, exif=b'')
 
                 output_paths.append(output_path)
 
@@ -150,6 +151,46 @@ class PhotoUniquifier:
                 params[key] = value
 
         return params
+
+    def _apply_intensity_multiplier(self, methods: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Apply intensity multiplier to method parameters.
+
+        Args:
+            methods: List of method configurations
+
+        Returns:
+            Modified list of method configurations
+        """
+        # Intensity multipliers
+        multipliers = {
+            'low': 1.5,      # Increase from original weak settings
+            'medium': 2.5,   # 1.5x from low
+            'high': 3.5      # 2x from low
+        }
+
+        multiplier = multipliers.get(self.intensity, 1.5)
+
+        modified_methods = []
+        for method in methods:
+            method_copy = method.copy()
+
+            # Apply multiplier to numeric parameters
+            for key, value in method_copy.items():
+                if key in ['name', 'enabled']:
+                    continue
+
+                if isinstance(value, list) and len(value) == 2:
+                    # Apply multiplier to range values
+                    method_copy[key] = [
+                        type(value[0])(value[0] * multiplier),
+                        type(value[1])(value[1] * multiplier)
+                    ]
+                elif isinstance(value, (int, float)):
+                    method_copy[key] = type(value)(value * multiplier)
+
+            modified_methods.append(method_copy)
+
+        return modified_methods
 
     def _apply_text_overlay(self, image: Image.Image, text: str) -> Image.Image:
         """Apply text overlay to image.
@@ -288,38 +329,38 @@ def create_default_photo_preset() -> Dict[str, Any]:
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [5, 15]
+                "intensity": [10, 25]
             },
             {
                 "name": "sparkles",
                 "enabled": True,
-                "count": [10, 30],
-                "size": [2, 5]
+                "count": [20, 50],
+                "size": [3, 7]
             },
             {
                 "name": "lens_flare",
                 "enabled": True,
-                "intensity": [0.3, 0.7]
+                "intensity": [0.4, 0.8]
             },
             {
                 "name": "rotate",
                 "enabled": True,
-                "angle": [-3, 3]
+                "angle": [-5, 5]
             },
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.95, 1.05]
+                "factor": [0.92, 1.08]
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.95, 1.05]
+                "factor": [0.92, 1.08]
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-5, 5]
+                "shift": [-8, 8]
             },
             {
                 "name": "blur",

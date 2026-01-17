@@ -136,6 +136,23 @@ def get_yes_no_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
+def get_intensity_keyboard() -> InlineKeyboardMarkup:
+    """Get uniquification intensity selection keyboard."""
+    keyboard = [
+        [
+            InlineKeyboardButton("🟢 Слабая", callback_data="intensity_low"),
+        ],
+        [
+            InlineKeyboardButton("🟡 Средняя", callback_data="intensity_medium"),
+        ],
+        [
+            InlineKeyboardButton("🔴 Сильная", callback_data="intensity_high"),
+        ],
+        [InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
 def get_overlay_position_keyboard() -> InlineKeyboardMarkup:
     """Get overlay position selection keyboard."""
     keyboard = [
