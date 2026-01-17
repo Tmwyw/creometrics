@@ -162,12 +162,18 @@ class PhotoUniquifier:
             Image with text overlay
         """
         try:
-            draw = ImageDraw.Draw(image)
+            # Create RGBA image for transparency support
+            if image.mode != 'RGBA':
+                image = image.convert('RGBA')
+
+            # Create overlay layer
+            overlay = Image.new('RGBA', image.size, (0, 0, 0, 0))
+            draw = ImageDraw.Draw(overlay)
 
             # Use default font (try to load a better one if available)
             try:
-                # Try to load a TrueType font
-                font_size = max(20, int(image.height * 0.05))
+                # Try to load a TrueType font - bigger size for better visibility
+                font_size = max(30, int(image.height * 0.08))
                 font = ImageFont.truetype("arial.ttf", font_size)
             except:
                 # Fallback to default font
@@ -180,12 +186,29 @@ class PhotoUniquifier:
 
             # Position text at bottom center with some padding
             x = (image.width - text_width) // 2
-            y = image.height - text_height - 20
+            y = image.height - text_height - 40
 
-            # Draw text with shadow for better visibility
-            shadow_offset = 2
-            draw.text((x + shadow_offset, y + shadow_offset), text, font=font, fill=(0, 0, 0, 200))
+            # Draw semi-transparent black background for text
+            padding = 20
+            draw.rectangle(
+                [x - padding, y - padding, x + text_width + padding, y + text_height + padding],
+                fill=(0, 0, 0, 180)
+            )
+
+            # Draw text with thick shadow for better visibility
+            shadow_offset = 3
+            # Multiple shadow layers for stronger effect
+            for offset in range(1, shadow_offset + 1):
+                draw.text((x + offset, y + offset), text, font=font, fill=(0, 0, 0, 255))
+
+            # Draw main text in white
             draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+
+            # Composite overlay onto image
+            image = Image.alpha_composite(image, overlay)
+
+            # Convert back to RGB
+            image = image.convert('RGB')
 
             return image
         except Exception as e:
