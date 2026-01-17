@@ -7,6 +7,9 @@ from .main_keyboards import (
     get_subscription_keyboard,
     get_video_quality_keyboard,
     get_admin_menu_keyboard,
+    get_file_format_keyboard,
+    get_yes_no_keyboard,
+    get_overlay_position_keyboard,
 )
 
 __all__ = [
@@ -16,4 +19,7 @@ __all__ = [
     'get_subscription_keyboard',
     'get_video_quality_keyboard',
     'get_admin_menu_keyboard',
+    'get_file_format_keyboard',
+    'get_yes_no_keyboard',
+    'get_overlay_position_keyboard',
 ]

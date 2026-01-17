@@ -2,8 +2,8 @@
 
 import random
 from pathlib import Path
-from typing import List, Dict, Any
-from PIL import Image
+from typing import List, Dict, Any, Optional
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 import logging
 
 from .methods import METHOD_REGISTRY
@@ -22,6 +22,12 @@ class PhotoUniquifier:
         """
         self.preset_config = preset_config
         self.methods = preset_config.get('methods', [])
+        self.file_format = preset_config.get('file_format', 'jpeg')
+        self.flip_horizontal = preset_config.get('flip_horizontal', False)
+        self.overlay_text = preset_config.get('overlay_text')
+        self.overlay_photo_path = preset_config.get('overlay_photo_path')
+        self.overlay_position = preset_config.get('overlay_position', 'center')
+        self.overlay_opacity = preset_config.get('overlay_opacity', 100)
 
     def uniquify(self, input_path: Path, output_dir: Path, count: int = 1) -> List[Path]:
         """Generate uniquified copies of a photo.
@@ -53,6 +59,10 @@ class PhotoUniquifier:
                 # Start with copy of original
                 image = original_image.copy()
 
+                # Apply flip if needed
+                if self.flip_horizontal:
+                    image = ImageOps.mirror(image)
+
                 # Apply enabled methods with random parameters
                 for method_config in self.methods:
                     if not method_config.get('enabled', False):
@@ -75,9 +85,34 @@ class PhotoUniquifier:
                         logger.error(f"Error applying method {method_name}: {e}")
                         # Continue with other methods
 
+                # Apply text overlay if needed
+                if self.overlay_text:
+                    image = self._apply_text_overlay(image, self.overlay_text)
+
+                # Apply photo overlay if needed
+                if self.overlay_photo_path:
+                    image = self._apply_photo_overlay(
+                        image,
+                        self.overlay_photo_path,
+                        self.overlay_position,
+                        self.overlay_opacity
+                    )
+
+                # Determine file extension based on format
+                ext_map = {'jpeg': '.jpg', 'png': '.png', 'webp': '.webp'}
+                ext = ext_map.get(self.file_format, '.jpg')
+
                 # Save result
-                output_path = output_dir / f"{input_path.stem}_unique_{i+1}{input_path.suffix}"
-                image.save(output_path, quality=95)
+                output_path = output_dir / f"{input_path.stem}_unique_{i+1}{ext}"
+
+                # Save with appropriate format
+                if self.file_format == 'jpeg':
+                    image.save(output_path, 'JPEG', quality=95)
+                elif self.file_format == 'png':
+                    image.save(output_path, 'PNG')
+                elif self.file_format == 'webp':
+                    image.save(output_path, 'WEBP', quality=95)
+
                 output_paths.append(output_path)
 
                 logger.info(f"Generated unique copy {i+1}/{count}: {output_path.name}")
@@ -115,6 +150,108 @@ class PhotoUniquifier:
                 params[key] = value
 
         return params
+
+    def _apply_text_overlay(self, image: Image.Image, text: str) -> Image.Image:
+        """Apply text overlay to image.
+
+        Args:
+            image: Input image
+            text: Text to overlay
+
+        Returns:
+            Image with text overlay
+        """
+        try:
+            draw = ImageDraw.Draw(image)
+
+            # Use default font (try to load a better one if available)
+            try:
+                # Try to load a TrueType font
+                font_size = max(20, int(image.height * 0.05))
+                font = ImageFont.truetype("arial.ttf", font_size)
+            except:
+                # Fallback to default font
+                font = ImageFont.load_default()
+
+            # Get text size
+            bbox = draw.textbbox((0, 0), text, font=font)
+            text_width = bbox[2] - bbox[0]
+            text_height = bbox[3] - bbox[1]
+
+            # Position text at bottom center with some padding
+            x = (image.width - text_width) // 2
+            y = image.height - text_height - 20
+
+            # Draw text with shadow for better visibility
+            shadow_offset = 2
+            draw.text((x + shadow_offset, y + shadow_offset), text, font=font, fill=(0, 0, 0, 200))
+            draw.text((x, y), text, font=font, fill=(255, 255, 255, 255))
+
+            return image
+        except Exception as e:
+            logger.error(f"Error applying text overlay: {e}")
+            return image
+
+    def _apply_photo_overlay(
+        self,
+        base_image: Image.Image,
+        overlay_path: str,
+        position: str,
+        opacity: int
+    ) -> Image.Image:
+        """Apply photo overlay to image.
+
+        Args:
+            base_image: Base image
+            overlay_path: Path to overlay image
+            position: Position (top_left, top_right, bottom_left, bottom_right, center)
+            opacity: Opacity (0-100)
+
+        Returns:
+            Image with photo overlay
+        """
+        try:
+            # Load overlay image
+            overlay = Image.open(overlay_path)
+            overlay = overlay.convert('RGBA')
+
+            # Resize overlay to 30% of base image size
+            overlay_width = int(base_image.width * 0.3)
+            overlay_height = int(overlay.height * (overlay_width / overlay.width))
+            overlay = overlay.resize((overlay_width, overlay_height), Image.Resampling.LANCZOS)
+
+            # Adjust opacity
+            alpha = overlay.split()[3]
+            alpha = alpha.point(lambda p: int(p * (opacity / 100)))
+            overlay.putalpha(alpha)
+
+            # Calculate position
+            if position == 'top_left':
+                x, y = 20, 20
+            elif position == 'top_right':
+                x, y = base_image.width - overlay_width - 20, 20
+            elif position == 'bottom_left':
+                x, y = 20, base_image.height - overlay_height - 20
+            elif position == 'bottom_right':
+                x, y = base_image.width - overlay_width - 20, base_image.height - overlay_height - 20
+            else:  # center
+                x = (base_image.width - overlay_width) // 2
+                y = (base_image.height - overlay_height) // 2
+
+            # Convert base to RGBA if needed
+            if base_image.mode != 'RGBA':
+                base_image = base_image.convert('RGBA')
+
+            # Paste overlay
+            base_image.paste(overlay, (x, y), overlay)
+
+            # Convert back to RGB
+            base_image = base_image.convert('RGB')
+
+            return base_image
+        except Exception as e:
+            logger.error(f"Error applying photo overlay: {e}")
+            return base_image
 
 
 def create_default_photo_preset() -> Dict[str, Any]:

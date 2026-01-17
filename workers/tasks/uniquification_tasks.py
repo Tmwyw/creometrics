@@ -19,7 +19,13 @@ def uniquify_photo_task(
     action_log_id: int,
     input_file_path: str,
     copies_count: int,
-    preset_id: int
+    preset_id: int,
+    file_format: str = 'jpeg',
+    flip_horizontal: bool = False,
+    overlay_text: str = None,
+    overlay_photo_path: str = None,
+    overlay_position: str = None,
+    overlay_opacity: int = None
 ) -> Dict[str, Any]:
     """Task to uniquify photo.
 
@@ -29,6 +35,12 @@ def uniquify_photo_task(
         input_file_path: Path to input photo
         copies_count: Number of copies to generate
         preset_id: Preset ID to use
+        file_format: Output file format (jpeg, png, webp)
+        flip_horizontal: Whether to flip horizontally
+        overlay_text: Text to overlay on image
+        overlay_photo_path: Path to photo to overlay
+        overlay_position: Position of overlay (top_left, top_right, etc.)
+        overlay_opacity: Opacity of overlay (0-100)
 
     Returns:
         Dictionary with result paths
@@ -53,8 +65,18 @@ def uniquify_photo_task(
         if not preset:
             raise ValueError(f"Preset {preset_id} not found")
 
-        # Create uniquifier
-        uniquifier = PhotoUniquifier(preset.config)
+        # Create uniquifier with additional options
+        config = preset.config.copy()
+        config['file_format'] = file_format
+        config['flip_horizontal'] = flip_horizontal
+        if overlay_text:
+            config['overlay_text'] = overlay_text
+        if overlay_photo_path:
+            config['overlay_photo_path'] = overlay_photo_path
+            config['overlay_position'] = overlay_position
+            config['overlay_opacity'] = overlay_opacity
+
+        uniquifier = PhotoUniquifier(config)
 
         # Process
         input_path = Path(input_file_path)

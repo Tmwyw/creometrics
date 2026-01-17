@@ -109,3 +109,47 @@ def get_admin_menu_keyboard() -> InlineKeyboardMarkup:
         ],
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+def get_file_format_keyboard() -> InlineKeyboardMarkup:
+    """Get file format selection keyboard."""
+    keyboard = [
+        [
+            InlineKeyboardButton("JPEG", callback_data="format_jpeg"),
+            InlineKeyboardButton("PNG", callback_data="format_png"),
+            InlineKeyboardButton("WEBP", callback_data="format_webp"),
+        ],
+        [InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_yes_no_keyboard() -> InlineKeyboardMarkup:
+    """Get yes/no keyboard."""
+    keyboard = [
+        [
+            InlineKeyboardButton("✅ Да", callback_data="answer_yes"),
+            InlineKeyboardButton("❌ Нет", callback_data="answer_no"),
+        ],
+        [InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_overlay_position_keyboard() -> InlineKeyboardMarkup:
+    """Get overlay position selection keyboard."""
+    keyboard = [
+        [
+            InlineKeyboardButton("↖️ Верх-лево", callback_data="position_top_left"),
+            InlineKeyboardButton("↗️ Верх-право", callback_data="position_top_right"),
+        ],
+        [
+            InlineKeyboardButton("↙️ Низ-лево", callback_data="position_bottom_left"),
+            InlineKeyboardButton("↘️ Низ-право", callback_data="position_bottom_right"),
+        ],
+        [
+            InlineKeyboardButton("🎯 Центр", callback_data="position_center"),
+        ],
+        [InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)

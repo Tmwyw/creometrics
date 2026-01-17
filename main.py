@@ -16,10 +16,16 @@ from config.settings import settings
 from database import init_db
 from bot.handlers.start import start_command, menu_callback
 from bot.handlers.uniquification import (
-    unique_photo_start, receive_photo, process_photo_uniquification,
+    unique_photo_start, receive_photo, select_copies_count,
+    select_file_format, select_flip_choice, select_text_choice, receive_text_input,
+    select_overlay_choice, receive_overlay_photo, select_overlay_position, receive_overlay_opacity,
+    process_photo_uniquification,
     unique_video_start, receive_video, process_video_uniquification,
     WAITING_FOR_PHOTO, WAITING_FOR_PHOTO_COPIES,
-    WAITING_FOR_VIDEO, WAITING_FOR_VIDEO_COPIES
+    WAITING_FOR_VIDEO, WAITING_FOR_VIDEO_COPIES,
+    WAITING_FOR_FILE_FORMAT, WAITING_FOR_FLIP_CHOICE, WAITING_FOR_TEXT_CHOICE,
+    WAITING_FOR_TEXT_INPUT, WAITING_FOR_OVERLAY_CHOICE, WAITING_FOR_OVERLAY_PHOTO,
+    WAITING_FOR_OVERLAY_POSITION, WAITING_FOR_OVERLAY_OPACITY
 )
 from bot.handlers.conversion import (
     mp3_to_voice_start, receive_mp3,
@@ -98,7 +104,15 @@ def main():
             entry_points=[CallbackQueryHandler(unique_photo_start, pattern="^menu_unique_photo$")],
             states={
                 WAITING_FOR_PHOTO: [MessageHandler(filters.PHOTO, receive_photo)],
-                WAITING_FOR_PHOTO_COPIES: [CallbackQueryHandler(process_photo_uniquification, pattern="^copies_")]
+                WAITING_FOR_PHOTO_COPIES: [CallbackQueryHandler(select_copies_count, pattern="^copies_")],
+                WAITING_FOR_FILE_FORMAT: [CallbackQueryHandler(select_file_format, pattern="^format_")],
+                WAITING_FOR_FLIP_CHOICE: [CallbackQueryHandler(select_flip_choice, pattern="^answer_")],
+                WAITING_FOR_TEXT_CHOICE: [CallbackQueryHandler(select_text_choice, pattern="^answer_")],
+                WAITING_FOR_TEXT_INPUT: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_text_input)],
+                WAITING_FOR_OVERLAY_CHOICE: [CallbackQueryHandler(select_overlay_choice, pattern="^answer_")],
+                WAITING_FOR_OVERLAY_PHOTO: [MessageHandler(filters.PHOTO, receive_overlay_photo)],
+                WAITING_FOR_OVERLAY_POSITION: [CallbackQueryHandler(select_overlay_position, pattern="^position_")],
+                WAITING_FOR_OVERLAY_OPACITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_overlay_opacity)],
             },
             fallbacks=[CallbackQueryHandler(menu_callback, pattern="^back_to_menu$")]
         )

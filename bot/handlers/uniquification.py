@@ -7,7 +7,13 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 
 from database import SessionLocal, User, ActionLog, ActionType, ActionStatus, UniquificationPreset, MediaType
-from bot.keyboards import get_copies_count_keyboard, get_back_to_menu_keyboard
+from bot.keyboards import (
+    get_copies_count_keyboard,
+    get_back_to_menu_keyboard,
+    get_file_format_keyboard,
+    get_yes_no_keyboard,
+    get_overlay_position_keyboard,
+)
 from bot.middlewares import subscription_required
 from config.settings import settings
 from workers.tasks.uniquification_tasks import uniquify_photo_task, uniquify_video_task
@@ -21,6 +27,14 @@ WAITING_FOR_PHOTO = 1
 WAITING_FOR_PHOTO_COPIES = 2
 WAITING_FOR_VIDEO = 3
 WAITING_FOR_VIDEO_COPIES = 4
+WAITING_FOR_FILE_FORMAT = 5
+WAITING_FOR_FLIP_CHOICE = 6
+WAITING_FOR_TEXT_CHOICE = 7
+WAITING_FOR_TEXT_INPUT = 8
+WAITING_FOR_OVERLAY_CHOICE = 9
+WAITING_FOR_OVERLAY_PHOTO = 10
+WAITING_FOR_OVERLAY_POSITION = 11
+WAITING_FOR_OVERLAY_OPACITY = 12
 
 
 async def unique_photo_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -88,8 +102,8 @@ async def receive_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     return WAITING_FOR_PHOTO_COPIES
 
 
-async def process_photo_uniquification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Process photo uniquification."""
+async def select_copies_count(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select number of copies."""
     query = update.callback_query
     await query.answer()
 
@@ -100,9 +114,234 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
     # Get copies count from callback
     copies_count = int(query.data.split('_')[1])
 
-    # Get file info from context
+    # Store copies count in context
+    context.user_data['copies_count'] = copies_count
+
+    # Ask for file format
+    await query.edit_message_text(
+        "📁 Выберите формат файла:",
+        reply_markup=get_file_format_keyboard()
+    )
+
+    return WAITING_FOR_FILE_FORMAT
+
+
+async def select_file_format(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select file format."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get format from callback
+    file_format = query.data.split('_')[1]  # jpeg, png, webp
+    context.user_data['file_format'] = file_format
+
+    # Ask about flipping
+    await query.edit_message_text(
+        "🔄 Отразить по горизонтали?",
+        reply_markup=get_yes_no_keyboard()
+    )
+
+    return WAITING_FOR_FLIP_CHOICE
+
+
+async def select_flip_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select flip choice."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get answer from callback
+    flip = query.data == 'answer_yes'
+    context.user_data['flip_horizontal'] = flip
+
+    # Ask about text
+    await query.edit_message_text(
+        "✍️ Добавить текст?",
+        reply_markup=get_yes_no_keyboard()
+    )
+
+    return WAITING_FOR_TEXT_CHOICE
+
+
+async def select_text_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select text choice."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get answer from callback
+    if query.data == 'answer_yes':
+        # Ask for text input
+        await query.edit_message_text(
+            "✍️ Введите текст, который нужно добавить на фото:\n\n"
+            "(Отправьте текстовое сообщение)"
+        )
+        return WAITING_FOR_TEXT_INPUT
+    else:
+        # No text, proceed to overlay question
+        context.user_data['overlay_text'] = None
+        await query.edit_message_text(
+            "➕ Добавить дополнительное фото?",
+            reply_markup=get_yes_no_keyboard()
+        )
+        return WAITING_FOR_OVERLAY_CHOICE
+
+
+async def receive_text_input(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Receive text input from user."""
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get text from message
+    text = update.message.text
+    context.user_data['overlay_text'] = text
+
+    # Ask about overlay photo
+    await update.message.reply_text(
+        "➕ Добавить дополнительное фото?",
+        reply_markup=get_yes_no_keyboard()
+    )
+
+    return WAITING_FOR_OVERLAY_CHOICE
+
+
+async def select_overlay_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select overlay choice."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get answer from callback
+    if query.data == 'answer_yes':
+        # Ask for overlay photo
+        await query.edit_message_text(
+            "📷 Отправьте дополнительное фото, которое будет наложено на основное:"
+        )
+        return WAITING_FOR_OVERLAY_PHOTO
+    else:
+        # No overlay, proceed to processing
+        context.user_data['overlay_photo_id'] = None
+        return await process_photo_uniquification(update, context)
+
+
+async def receive_overlay_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Receive overlay photo from user."""
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get photo
+    photo = update.message.photo[-1]  # Get largest size
+    context.user_data['overlay_photo_id'] = photo.file_id
+
+    # Ask for position
+    await update.message.reply_text(
+        "📍 Выберите позицию дополнительного фото:",
+        reply_markup=get_overlay_position_keyboard()
+    )
+
+    return WAITING_FOR_OVERLAY_POSITION
+
+
+async def select_overlay_position(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select overlay position."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get position from callback
+    position = query.data.split('_', 1)[1]  # top_left, top_right, etc.
+    context.user_data['overlay_position'] = position
+
+    # Ask for opacity
+    await query.edit_message_text(
+        "🎨 Введите непрозрачность дополнительного фото (0-100):\n\n"
+        "0 = полностью прозрачное\n"
+        "100 = полностью непрозрачное\n\n"
+        "(Отправьте число от 0 до 100)"
+    )
+
+    return WAITING_FOR_OVERLAY_OPACITY
+
+
+async def receive_overlay_opacity(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Receive overlay opacity from user."""
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get opacity from message
+    try:
+        opacity = int(update.message.text)
+        if opacity < 0 or opacity > 100:
+            await update.message.reply_text(
+                "❌ Введите число от 0 до 100"
+            )
+            return WAITING_FOR_OVERLAY_OPACITY
+
+        context.user_data['overlay_opacity'] = opacity
+
+        # Now process the uniquification
+        # Create a fake query object for process_photo_uniquification
+        class FakeQuery:
+            def __init__(self, message):
+                self.message = message
+            async def answer(self):
+                pass
+            async def edit_message_text(self, text, **kwargs):
+                await self.message.reply_text(text, **kwargs)
+
+        fake_update = type('obj', (object,), {
+            'callback_query': FakeQuery(update.message),
+            'effective_user': update.effective_user,
+            'effective_chat': update.effective_chat
+        })()
+
+        return await process_photo_uniquification(fake_update, context)
+
+    except ValueError:
+        await update.message.reply_text(
+            "❌ Введите корректное число от 0 до 100"
+        )
+        return WAITING_FOR_OVERLAY_OPACITY
+
+
+async def process_photo_uniquification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Process photo uniquification."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get all parameters from context
+    copies_count = context.user_data.get('copies_count')
     file_id = context.user_data.get('photo_file_id')
     file_size = context.user_data.get('photo_file_size', 0)
+    file_format = context.user_data.get('file_format', 'jpeg')
+    flip_horizontal = context.user_data.get('flip_horizontal', False)
+    overlay_text = context.user_data.get('overlay_text')
+    overlay_photo_id = context.user_data.get('overlay_photo_id')
+    overlay_position = context.user_data.get('overlay_position')
+    overlay_opacity = context.user_data.get('overlay_opacity')
 
     if not file_id:
         await query.edit_message_text("❌ Ошибка: файл не найден")
@@ -135,13 +374,33 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
         file_path = settings.TEMP_DIR / f"photo_{update.effective_user.id}_{file_id}.jpg"
         await file.download_to_drive(file_path)
 
+        # Download overlay photo if needed
+        overlay_file_path = None
+        if overlay_photo_id:
+            overlay_file = await context.bot.get_file(overlay_photo_id)
+            overlay_file_path = settings.TEMP_DIR / f"overlay_{update.effective_user.id}_{overlay_photo_id}.jpg"
+            await overlay_file.download_to_drive(overlay_file_path)
+            overlay_file_path = str(overlay_file_path)
+
         # Create action log
+        parameters = {
+            'copies_count': copies_count,
+            'file_format': file_format,
+            'flip_horizontal': flip_horizontal,
+        }
+        if overlay_text:
+            parameters['overlay_text'] = overlay_text
+        if overlay_photo_id:
+            parameters['overlay_photo'] = True
+            parameters['overlay_position'] = overlay_position
+            parameters['overlay_opacity'] = overlay_opacity
+
         action_log = ActionLog(
             user_id=user.id,
             action_type=ActionType.UNIQUE_PHOTO,
             status=ActionStatus.PENDING,
             file_size=file_size,
-            parameters={'copies_count': copies_count},
+            parameters=parameters,
             preset_id=preset.id
         )
         db.add(action_log)
@@ -169,7 +428,13 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
             action_log_id=action_log.id,
             input_file_path=str(file_path),
             copies_count=copies_count,
-            preset_id=preset.id
+            preset_id=preset.id,
+            file_format=file_format,
+            flip_horizontal=flip_horizontal,
+            overlay_text=overlay_text,
+            overlay_photo_path=overlay_file_path,
+            overlay_position=overlay_position,
+            overlay_opacity=overlay_opacity
         )
 
         # Poll task in background
