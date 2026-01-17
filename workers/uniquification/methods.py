@@ -232,6 +232,34 @@ def apply_blur(image: Image.Image, radius: Tuple[float, float] = (0.5, 2.0)) -> 
 
 
 # Method registry for dynamic execution
+def random_crop(image: Image.Image, crop_percent: Tuple[float, float] = (1, 3)) -> Image.Image:
+    """Randomly crop edges of image.
+
+    Args:
+        image: Input image
+        crop_percent: Range of crop percentage (min, max) from each edge
+
+    Returns:
+        Cropped image
+    """
+    width, height = image.size
+    crop_pct = random.uniform(*crop_percent) / 100
+
+    # Calculate crop amount for each edge
+    left_crop = int(width * crop_pct * random.uniform(0.5, 1.5))
+    right_crop = int(width * crop_pct * random.uniform(0.5, 1.5))
+    top_crop = int(height * crop_pct * random.uniform(0.5, 1.5))
+    bottom_crop = int(height * crop_pct * random.uniform(0.5, 1.5))
+
+    # Crop the image
+    return image.crop((
+        left_crop,
+        top_crop,
+        width - right_crop,
+        height - bottom_crop
+    ))
+
+
 METHOD_REGISTRY = {
     'noise': add_noise,
     'sparkles': add_sparkles,
@@ -241,4 +269,5 @@ METHOD_REGISTRY = {
     'contrast': adjust_contrast,
     'hue': adjust_hue,
     'blur': apply_blur,
+    'crop': random_crop,
 }

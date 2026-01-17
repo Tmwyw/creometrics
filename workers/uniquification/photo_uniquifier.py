@@ -327,45 +327,50 @@ def create_default_photo_preset() -> Dict[str, Any]:
     return {
         "methods": [
             {
+                "name": "crop",
+                "enabled": True,
+                "crop_percent": [1, 3]
+            },
+            {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [15, 35]
+                "intensity": [20, 50]
             },
             {
                 "name": "sparkles",
                 "enabled": True,
-                "count": [30, 70],
-                "size": [4, 10]
+                "count": [40, 100],
+                "size": [5, 12]
             },
             {
                 "name": "lens_flare",
                 "enabled": True,
-                "intensity": [0.5, 0.9]
+                "intensity": [0.6, 1.0]
             },
             {
                 "name": "rotate",
                 "enabled": True,
-                "angle": [-8, 8]
+                "angle": [-10, 10]
             },
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.88, 1.12]
+                "factor": [0.85, 1.15]
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.88, 1.12]
+                "factor": [0.85, 1.15]
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-12, 12]
+                "shift": [-15, 15]
             },
             {
                 "name": "blur",
                 "enabled": True,
-                "radius": [0.3, 0.8]
+                "radius": [0.5, 1.2]
             }
         ]
     }
