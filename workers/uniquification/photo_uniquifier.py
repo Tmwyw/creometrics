@@ -163,9 +163,9 @@ class PhotoUniquifier:
         """
         # Intensity multipliers
         multipliers = {
-            'low': 1.5,      # Increase from original weak settings
-            'medium': 2.5,   # 1.5x from low
-            'high': 3.5      # 2x from low
+            'low': 2.0,      # Base level
+            'medium': 4.0,   # 2x from low
+            'high': 7.0      # 3.5x from low
         }
 
         multiplier = multipliers.get(self.intensity, 1.5)
@@ -329,43 +329,43 @@ def create_default_photo_preset() -> Dict[str, Any]:
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [10, 25]
+                "intensity": [15, 35]
             },
             {
                 "name": "sparkles",
                 "enabled": True,
-                "count": [20, 50],
-                "size": [3, 7]
+                "count": [30, 70],
+                "size": [4, 10]
             },
             {
                 "name": "lens_flare",
                 "enabled": True,
-                "intensity": [0.4, 0.8]
+                "intensity": [0.5, 0.9]
             },
             {
                 "name": "rotate",
                 "enabled": True,
-                "angle": [-5, 5]
+                "angle": [-8, 8]
             },
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.92, 1.08]
+                "factor": [0.88, 1.12]
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.92, 1.08]
+                "factor": [0.88, 1.12]
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-8, 8]
+                "shift": [-12, 12]
             },
             {
                 "name": "blur",
-                "enabled": False,
-                "radius": [0.5, 1.5]
+                "enabled": True,
+                "radius": [0.3, 0.8]
             }
         ]
     }
