@@ -60,6 +60,10 @@ class PhotoUniquifier:
         # Generate unique copies
         for i in range(count):
             try:
+                # Set seed based on copy number for reproducibility
+                # Each copy gets different randomization, but same copy number = same result
+                random.seed(i + hash(input_path.name))
+
                 # Start with copy of original
                 image = original_image.copy()
 
@@ -136,13 +140,16 @@ class PhotoUniquifier:
         return output_paths
 
     def _prepare_parameters(self, method_config: Dict[str, Any]) -> Dict[str, Any]:
-        """Prepare parameters for a method - pass ranges as tuples.
+        """Prepare parameters for a method - select random value from range once.
+
+        This ensures consistent intensity behavior: each copy uses the same
+        randomized parameters, making intensity differences visible.
 
         Args:
             method_config: Method configuration
 
         Returns:
-            Dictionary of parameters with ranges as tuples
+            Dictionary of parameters with ranges converted to single values
         """
         params = {}
 
@@ -150,9 +157,12 @@ class PhotoUniquifier:
             if key in ['name', 'enabled']:
                 continue
 
-            # If value is a list with 2 elements, convert to tuple (methods expect ranges)
+            # If value is a list with 2 elements, randomly select within range
             if isinstance(value, list) and len(value) == 2:
-                params[key] = tuple(value)
+                if all(isinstance(v, int) for v in value):
+                    params[key] = random.randint(value[0], value[1])
+                else:
+                    params[key] = random.uniform(float(value[0]), float(value[1]))
             else:
                 # Use value as-is
                 params[key] = value

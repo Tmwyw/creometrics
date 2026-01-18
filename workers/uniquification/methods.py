@@ -3,21 +3,42 @@
 import random
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter, ImageDraw
-from typing import Tuple, List
+from typing import Tuple, List, Union
 
 
-def add_noise(image: Image.Image, intensity: Tuple[int, int] = (5, 15)) -> Image.Image:
+def _get_value(param: Union[int, float, Tuple]) -> Union[int, float]:
+    """Extract value from parameter - handles both single values and tuples.
+
+    Args:
+        param: Either a single value or a tuple (min, max) for random selection
+
+    Returns:
+        Single value
+    """
+    if isinstance(param, tuple):
+        if all(isinstance(v, int) for v in param):
+            return random.randint(*param)
+        else:
+            return random.uniform(*param)
+    return param
+
+
+def add_noise(image: Image.Image, intensity: Union[int, Tuple[int, int]] = (5, 15)) -> Image.Image:
     """Add random noise to image.
 
     Args:
         image: Input image
-        intensity: Range of noise intensity (min, max)
+        intensity: Noise intensity value or range (min, max)
 
     Returns:
         Image with added noise
     """
     img_array = np.array(image)
-    noise_intensity = random.randint(*intensity)
+    # Handle both single value and tuple
+    if isinstance(intensity, tuple):
+        noise_intensity = _get_value(intensity)
+    else:
+        noise_intensity = intensity
 
     # Generate noise
     noise = np.random.randint(-noise_intensity, noise_intensity + 1, img_array.shape, dtype=np.int16)
@@ -30,8 +51,8 @@ def add_noise(image: Image.Image, intensity: Tuple[int, int] = (5, 15)) -> Image
 
 def add_sparkles(
     image: Image.Image,
-    count: Tuple[int, int] = (10, 30),
-    size: Tuple[int, int] = (2, 5),
+    count: Union[int, Tuple[int, int]] = (10, 30),
+    size: Union[int, Tuple[int, int]] = (2, 5),
     colors: List[Tuple[int, int, int, int]] = None
 ) -> Image.Image:
     """Add sparkle/star effects to image.
@@ -56,12 +77,12 @@ def add_sparkles(
     draw = ImageDraw.Draw(img, 'RGBA')
     width, height = img.size
 
-    sparkle_count = random.randint(*count)
+    sparkle_count = _get_value(count)
 
     for _ in range(sparkle_count):
         x = random.randint(0, width - 1)
         y = random.randint(0, height - 1)
-        sparkle_size = random.randint(*size)
+        sparkle_size = _get_value(size)
         color = random.choice(colors)
 
         # Draw a star shape
@@ -86,7 +107,7 @@ def add_sparkles(
 
 def add_lens_flare(
     image: Image.Image,
-    intensity: Tuple[float, float] = (0.3, 0.7),
+    intensity: Union[float, Tuple[float, float]] = (0.3, 0.7),
     position: Tuple[str, str] = None
 ) -> Image.Image:
     """Add lens flare effect to image.
@@ -132,7 +153,7 @@ def add_lens_flare(
     x += random.randint(-width // 10, width // 10)
     y += random.randint(-height // 10, height // 10)
 
-    flare_intensity = random.uniform(*intensity)
+    flare_intensity = _get_value(intensity)
     alpha = int(255 * flare_intensity)
 
     # Draw multiple circles for flare effect
@@ -153,7 +174,7 @@ def add_lens_flare(
     return result.convert(image.mode)
 
 
-def rotate_image(image: Image.Image, angle: Tuple[float, float] = (-3, 3)) -> Image.Image:
+def rotate_image(image: Image.Image, angle: Union[float, Tuple[float, float]] = (-3, 3)) -> Image.Image:
     """Rotate image by random angle.
 
     Args:
@@ -163,11 +184,11 @@ def rotate_image(image: Image.Image, angle: Tuple[float, float] = (-3, 3)) -> Im
     Returns:
         Rotated image
     """
-    rotation_angle = random.uniform(*angle)
+    rotation_angle = _get_value(angle)
     return image.rotate(rotation_angle, expand=False, fillcolor='white')
 
 
-def adjust_brightness(image: Image.Image, factor: Tuple[float, float] = (0.95, 1.05)) -> Image.Image:
+def adjust_brightness(image: Image.Image, factor: Union[float, Tuple[float, float]] = (0.95, 1.05)) -> Image.Image:
     """Adjust image brightness.
 
     Args:
@@ -177,12 +198,12 @@ def adjust_brightness(image: Image.Image, factor: Tuple[float, float] = (0.95, 1
     Returns:
         Image with adjusted brightness
     """
-    brightness_factor = random.uniform(*factor)
+    brightness_factor = _get_value(factor)
     enhancer = ImageEnhance.Brightness(image)
     return enhancer.enhance(brightness_factor)
 
 
-def adjust_contrast(image: Image.Image, factor: Tuple[float, float] = (0.95, 1.05)) -> Image.Image:
+def adjust_contrast(image: Image.Image, factor: Union[float, Tuple[float, float]] = (0.95, 1.05)) -> Image.Image:
     """Adjust image contrast.
 
     Args:
@@ -192,12 +213,12 @@ def adjust_contrast(image: Image.Image, factor: Tuple[float, float] = (0.95, 1.0
     Returns:
         Image with adjusted contrast
     """
-    contrast_factor = random.uniform(*factor)
+    contrast_factor = _get_value(factor)
     enhancer = ImageEnhance.Contrast(image)
     return enhancer.enhance(contrast_factor)
 
 
-def adjust_hue(image: Image.Image, shift: Tuple[int, int] = (-5, 5)) -> Image.Image:
+def adjust_hue(image: Image.Image, shift: Union[int, Tuple[int, int]] = (-5, 5)) -> Image.Image:
     """Adjust image hue.
 
     Args:
@@ -208,7 +229,7 @@ def adjust_hue(image: Image.Image, shift: Tuple[int, int] = (-5, 5)) -> Image.Im
         Image with adjusted hue
     """
     img_array = np.array(image.convert('HSV'))
-    hue_shift = random.randint(*shift)
+    hue_shift = _get_value(shift)
 
     # Shift hue channel
     img_array[:, :, 0] = (img_array[:, :, 0].astype(np.int16) + hue_shift) % 256
@@ -217,7 +238,7 @@ def adjust_hue(image: Image.Image, shift: Tuple[int, int] = (-5, 5)) -> Image.Im
     return result.convert(image.mode)
 
 
-def apply_blur(image: Image.Image, radius: Tuple[float, float] = (0.5, 2.0)) -> Image.Image:
+def apply_blur(image: Image.Image, radius: Union[float, Tuple[float, float]] = (0.5, 2.0)) -> Image.Image:
     """Apply subtle blur to image.
 
     Args:
@@ -227,12 +248,12 @@ def apply_blur(image: Image.Image, radius: Tuple[float, float] = (0.5, 2.0)) -> 
     Returns:
         Blurred image
     """
-    blur_radius = random.uniform(*radius)
+    blur_radius = _get_value(radius)
     return image.filter(ImageFilter.GaussianBlur(radius=blur_radius))
 
 
 # Method registry for dynamic execution
-def random_crop(image: Image.Image, crop_percent: Tuple[float, float] = (1, 3)) -> Image.Image:
+def random_crop(image: Image.Image, crop_percent: Union[float, Tuple[float, float]] = (1, 3)) -> Image.Image:
     """Randomly crop edges of image.
 
     Args:
@@ -243,7 +264,7 @@ def random_crop(image: Image.Image, crop_percent: Tuple[float, float] = (1, 3)) 
         Cropped image
     """
     width, height = image.size
-    crop_pct = random.uniform(*crop_percent) / 100
+    crop_pct = _get_value(crop_percent) / 100
 
     # Calculate crop amount for each edge
     left_crop = int(width * crop_pct * random.uniform(0.5, 1.5))
