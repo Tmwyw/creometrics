@@ -187,9 +187,18 @@ class PhotoUniquifier:
 
         multiplier = multipliers.get(self.intensity, 1.5)
 
+        # Methods that should NOT be scaled (always use base values)
+        no_scale_methods = {'brightness', 'contrast', 'hue', 'blur'}
+
         modified_methods = []
         for method in methods:
             method_copy = method.copy()
+            method_name = method.get('name')
+
+            # Skip scaling for certain methods
+            if method_name in no_scale_methods:
+                modified_methods.append(method_copy)
+                continue
 
             # Apply multiplier to numeric parameters
             for key, value in method_copy.items():
