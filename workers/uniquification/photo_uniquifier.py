@@ -161,11 +161,11 @@ class PhotoUniquifier:
         Returns:
             Modified list of method configurations
         """
-        # Intensity multipliers
+        # Intensity multipliers - EXTREME VALUES
         multipliers = {
-            'low': 2.0,      # Base level
-            'medium': 4.0,   # 2x from low
-            'high': 7.0      # 3.5x from low
+            'low': 1.0,      # Use base values as-is (already strong)
+            'medium': 1.5,   # 50% increase
+            'high': 2.5      # 150% increase
         }
 
         multiplier = multipliers.get(self.intensity, 1.5)
@@ -329,48 +329,43 @@ def create_default_photo_preset() -> Dict[str, Any]:
             {
                 "name": "crop",
                 "enabled": True,
-                "crop_percent": [1, 3]
+                "crop_percent": [2, 5]
             },
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [20, 50]
-            },
-            {
-                "name": "sparkles",
-                "enabled": True,
-                "count": [40, 100],
-                "size": [5, 12]
-            },
-            {
-                "name": "lens_flare",
-                "enabled": True,
-                "intensity": [0.6, 1.0]
-            },
-            {
-                "name": "rotate",
-                "enabled": True,
-                "angle": [-10, 10]
+                "intensity": [50, 120]
             },
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.85, 1.15]
+                "factor": [0.75, 1.25]
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.85, 1.15]
+                "factor": [0.75, 1.25]
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-15, 15]
+                "shift": [-25, 25]
             },
             {
                 "name": "blur",
                 "enabled": True,
-                "radius": [0.5, 1.2]
+                "radius": [1.0, 2.5]
+            },
+            {
+                "name": "sparkles",
+                "enabled": True,
+                "count": [100, 200],
+                "size": [8, 15]
+            },
+            {
+                "name": "lens_flare",
+                "enabled": True,
+                "intensity": [0.7, 1.0]
             }
         ]
     }
