@@ -347,41 +347,41 @@ def create_default_photo_preset() -> Dict[str, Any]:
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [30, 80]  # Visible noise - scales with intensity
+                "intensity": [15, 40]  # Subtle grain texture - scales with intensity
             },
             {
                 "name": "sparkles",
                 "enabled": True,
-                "count": [50, 150],  # Sparkle count - scales with intensity
-                "size": [5, 12]  # Sparkle size
-            },
-            {
-                "name": "lens_flare",
-                "enabled": True,
-                "intensity": [0.3, 0.7]  # Lens flare strength - scales with intensity
+                "count": [20, 50],  # Fewer sparkles - scales with intensity
+                "size": [3, 7]  # Smaller sparkles
             },
             # SUBTLE ADJUSTMENTS - always minimal, don't interfere with content
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.97, 1.03]  # Max 3% change - barely noticeable
+                "factor": [1.0, 1.03]  # ONLY brighten, NEVER darken (0% to +3%)
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.97, 1.03]  # Max 3% change - barely noticeable
+                "factor": [0.98, 1.02]  # Very subtle contrast change (±2%)
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-5, 5]  # Max 5 degrees - subtle color shift
+                "shift": [-3, 3]  # Minimal color shift (±3 degrees)
             },
             {
                 "name": "blur",
                 "enabled": True,
-                "radius": [0.2, 0.5]  # Very subtle blur
+                "radius": [0.1, 0.3]  # Barely noticeable blur
             },
-            # DISABLED - changes composition
+            # DISABLED - too distracting or changes composition
+            {
+                "name": "lens_flare",
+                "enabled": False,
+                "intensity": [0.3, 0.7]  # Disabled - creates annoying circles
+            },
             {
                 "name": "crop",
                 "enabled": False,
