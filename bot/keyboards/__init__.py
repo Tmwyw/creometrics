@@ -11,6 +11,7 @@ from .main_keyboards import (
     get_yes_no_keyboard,
     get_intensity_keyboard,
     get_overlay_position_keyboard,
+    get_send_type_keyboard,
 )
 
 __all__ = [
@@ -24,4 +25,5 @@ __all__ = [
     'get_yes_no_keyboard',
     'get_intensity_keyboard',
     'get_overlay_position_keyboard',
+    'get_send_type_keyboard',
 ]

@@ -14,6 +14,7 @@ from bot.keyboards import (
     get_yes_no_keyboard,
     get_intensity_keyboard,
     get_overlay_position_keyboard,
+    get_send_type_keyboard,
 )
 from bot.middlewares import subscription_required
 from config.settings import settings
@@ -37,6 +38,7 @@ WAITING_FOR_OVERLAY_CHOICE = 10
 WAITING_FOR_OVERLAY_PHOTO = 11
 WAITING_FOR_OVERLAY_POSITION = 12
 WAITING_FOR_OVERLAY_OPACITY = 13
+WAITING_FOR_SEND_TYPE = 14
 
 
 async def unique_photo_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -260,9 +262,15 @@ async def select_overlay_choice(update: Update, context: ContextTypes.DEFAULT_TY
         )
         return WAITING_FOR_OVERLAY_PHOTO
     else:
-        # No overlay, proceed to processing
+        # No overlay, ask about send type
         context.user_data['overlay_photo_id'] = None
-        return await process_photo_uniquification(update, context)
+        await query.edit_message_text(
+            "📤 Как отправить результаты?\n\n"
+            "📸 Сжатое — быстрая отправка, Telegram сжимает фото\n"
+            "📄 Без сжатия — отправка файлом, без потери качества",
+            reply_markup=get_send_type_keyboard()
+        )
+        return WAITING_FOR_SEND_TYPE
 
 
 async def receive_overlay_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -325,29 +333,37 @@ async def receive_overlay_opacity(update: Update, context: ContextTypes.DEFAULT_
 
         context.user_data['overlay_opacity'] = opacity
 
-        # Now process the uniquification
-        # Create a fake query object for process_photo_uniquification
-        class FakeQuery:
-            def __init__(self, message):
-                self.message = message
-            async def answer(self):
-                pass
-            async def edit_message_text(self, text, **kwargs):
-                await self.message.reply_text(text, **kwargs)
-
-        fake_update = type('obj', (object,), {
-            'callback_query': FakeQuery(update.message),
-            'effective_user': update.effective_user,
-            'effective_chat': update.effective_chat
-        })()
-
-        return await process_photo_uniquification(fake_update, context)
+        # Ask about send type
+        await update.message.reply_text(
+            "📤 Как отправить результаты?\n\n"
+            "📸 Сжатое — быстрая отправка, Telegram сжимает фото\n"
+            "📄 Без сжатия — отправка файлом, без потери качества",
+            reply_markup=get_send_type_keyboard()
+        )
+        return WAITING_FOR_SEND_TYPE
 
     except ValueError:
         await update.message.reply_text(
             "❌ Введите корректное число от 0 до 100"
         )
         return WAITING_FOR_OVERLAY_OPACITY
+
+
+async def select_send_type(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Select send type (compressed or document)."""
+    query = update.callback_query
+    await query.answer()
+
+    # Check subscription
+    if not await subscription_required(update, context):
+        return ConversationHandler.END
+
+    # Get send type from callback
+    send_type = query.data.split('_')[1]  # compressed or document
+    context.user_data['send_as_document'] = (send_type == 'document')
+
+    # Now process the uniquification
+    return await process_photo_uniquification(update, context)
 
 
 async def process_photo_uniquification(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -370,6 +386,7 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
     overlay_photo_id = context.user_data.get('overlay_photo_id')
     overlay_position = context.user_data.get('overlay_position')
     overlay_opacity = context.user_data.get('overlay_opacity')
+    send_as_document = context.user_data.get('send_as_document', False)
 
     if not file_id:
         await query.edit_message_text("❌ Ошибка: файл не найден")
@@ -474,7 +491,8 @@ async def process_photo_uniquification(update: Update, context: ContextTypes.DEF
                 chat_id=update.effective_chat.id,
                 message_id=progress_msg.message_id,
                 action_type="unique_photo",
-                progress_message=f"⏳ Создаю {copies_count} уникальных копий фото..."
+                progress_message=f"⏳ Создаю {copies_count} уникальных копий фото...",
+                send_as_document=send_as_document
             )
         )
 

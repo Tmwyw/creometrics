@@ -170,3 +170,17 @@ def get_overlay_position_keyboard() -> InlineKeyboardMarkup:
         [InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
+
+
+def get_send_type_keyboard() -> InlineKeyboardMarkup:
+    """Get send type selection keyboard (compressed vs document)."""
+    keyboard = [
+        [
+            InlineKeyboardButton("📸 Сжатое (обычное фото)", callback_data="sendtype_compressed"),
+        ],
+        [
+            InlineKeyboardButton("📄 Без сжатия (документ)", callback_data="sendtype_document"),
+        ],
+        [InlineKeyboardButton("◀️ Назад в меню", callback_data="back_to_menu")],
+    ]
+    return InlineKeyboardMarkup(keyboard)

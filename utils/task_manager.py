@@ -33,7 +33,8 @@ class TaskManager:
         chat_id: int,
         message_id: int,
         action_type: str,
-        progress_message: str = "⏳ Обработка..."
+        progress_message: str = "⏳ Обработка...",
+        send_as_document: bool = False
     ) -> None:
         """Poll task status and send results when ready.
 
@@ -64,7 +65,7 @@ class TaskManager:
             # Task is ready
             if task.successful():
                 result = task.result
-                await self._send_results(chat_id, message_id, action_type, result)
+                await self._send_results(chat_id, message_id, action_type, result, send_as_document)
             else:
                 error_msg = str(task.info) if task.info else "Неизвестная ошибка"
                 await self.bot.edit_message_text(
@@ -86,7 +87,8 @@ class TaskManager:
         chat_id: int,
         message_id: int,
         action_type: str,
-        result: dict
+        result: dict,
+        send_as_document: bool = False
     ) -> None:
         """Send results to user based on action type.
 
@@ -98,7 +100,7 @@ class TaskManager:
         """
         try:
             if action_type == "unique_photo":
-                await self._send_uniquified_photos(chat_id, message_id, result)
+                await self._send_uniquified_photos(chat_id, message_id, result, send_as_document)
             elif action_type == "unique_video":
                 await self._send_uniquified_videos(chat_id, message_id, result)
             elif action_type == "mp3_to_voice":
@@ -122,7 +124,7 @@ class TaskManager:
                 text="❌ Ошибка при отправке результатов."
             )
 
-    async def _send_uniquified_photos(self, chat_id: int, message_id: int, result: dict) -> None:
+    async def _send_uniquified_photos(self, chat_id: int, message_id: int, result: dict, send_as_document: bool = False) -> None:
         """Send uniquified photos."""
         output_paths = [Path(p) for p in result.get('output_paths', [])]
         intensity = result.get('intensity', 'medium')
@@ -144,21 +146,31 @@ class TaskManager:
         intensity_text = intensity_map.get(intensity, '🟡 средняя')
 
         # Update message
+        send_type_text = "документом" if send_as_document else "обычным фото"
         await self.bot.edit_message_text(
             chat_id=chat_id,
             message_id=message_id,
-            text=f"✅ Готово! Отправляю {len(output_paths)} уникальных копий..."
+            text=f"✅ Готово! Отправляю {len(output_paths)} уникальных копий {send_type_text}..."
         )
 
         # Send all photos
         for i, photo_path in enumerate(output_paths, 1):
             try:
                 with open(photo_path, 'rb') as photo:
-                    await self.bot.send_photo(
-                        chat_id=chat_id,
-                        photo=photo,
-                        caption=f"📸 Копия {i}/{len(output_paths)} - {intensity_text}"
-                    )
+                    if send_as_document:
+                        # Send as document (no compression)
+                        await self.bot.send_document(
+                            chat_id=chat_id,
+                            document=photo,
+                            caption=f"📸 Копия {i}/{len(output_paths)} - {intensity_text}"
+                        )
+                    else:
+                        # Send as photo (compressed)
+                        await self.bot.send_photo(
+                            chat_id=chat_id,
+                            photo=photo,
+                            caption=f"📸 Копия {i}/{len(output_paths)} - {intensity_text}"
+                        )
             except Exception as e:
                 logger.error(f"Error sending photo {photo_path}: {e}")
 

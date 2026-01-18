@@ -19,13 +19,13 @@ from bot.handlers.uniquification import (
     unique_photo_start, receive_photo, select_copies_count, select_intensity,
     select_file_format, select_flip_choice, select_text_choice, receive_text_input,
     select_overlay_choice, receive_overlay_photo, select_overlay_position, receive_overlay_opacity,
-    process_photo_uniquification,
+    select_send_type, process_photo_uniquification,
     unique_video_start, receive_video, process_video_uniquification,
     WAITING_FOR_PHOTO, WAITING_FOR_PHOTO_COPIES,
     WAITING_FOR_VIDEO, WAITING_FOR_VIDEO_COPIES,
     WAITING_FOR_INTENSITY, WAITING_FOR_FILE_FORMAT, WAITING_FOR_FLIP_CHOICE, WAITING_FOR_TEXT_CHOICE,
     WAITING_FOR_TEXT_INPUT, WAITING_FOR_OVERLAY_CHOICE, WAITING_FOR_OVERLAY_PHOTO,
-    WAITING_FOR_OVERLAY_POSITION, WAITING_FOR_OVERLAY_OPACITY
+    WAITING_FOR_OVERLAY_POSITION, WAITING_FOR_OVERLAY_OPACITY, WAITING_FOR_SEND_TYPE
 )
 from bot.handlers.conversion import (
     mp3_to_voice_start, receive_mp3,
@@ -118,6 +118,7 @@ def main():
                 WAITING_FOR_OVERLAY_PHOTO: [MessageHandler(filters.PHOTO, receive_overlay_photo)],
                 WAITING_FOR_OVERLAY_POSITION: [CallbackQueryHandler(select_overlay_position, pattern="^position_")],
                 WAITING_FOR_OVERLAY_OPACITY: [MessageHandler(filters.TEXT & ~filters.COMMAND, receive_overlay_opacity)],
+                WAITING_FOR_SEND_TYPE: [CallbackQueryHandler(select_send_type, pattern="^sendtype_")],
             },
             fallbacks=[CallbackQueryHandler(menu_callback, pattern="^back_to_menu$")]
         )
