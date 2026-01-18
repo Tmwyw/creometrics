@@ -22,7 +22,10 @@ class PhotoUniquifier:
         """
         self.preset_config = preset_config
         self.intensity = preset_config.get('intensity', 'low')
+        logger.info(f"[INIT] Intensity: {self.intensity}")
+        logger.info(f"[INIT] Raw methods from config: {preset_config.get('methods', [])}")
         self.methods = self._apply_intensity_multiplier(preset_config.get('methods', []))
+        logger.info(f"[INIT] Methods after intensity multiplier: {self.methods}")
         self.file_format = preset_config.get('file_format', 'jpeg')
         self.flip_horizontal = preset_config.get('flip_horizontal', False)
         self.overlay_text = preset_config.get('overlay_text')
@@ -60,30 +63,38 @@ class PhotoUniquifier:
                 # Start with copy of original
                 image = original_image.copy()
 
+                logger.info(f"[UNIQUIFY] Copy {i+1}/{count}: Starting with {len(self.methods)} methods")
+
                 # Apply flip if needed
                 if self.flip_horizontal:
                     image = ImageOps.mirror(image)
+                    logger.info(f"[UNIQUIFY] Applied horizontal flip")
 
                 # Apply enabled methods with random parameters
                 for method_config in self.methods:
                     if not method_config.get('enabled', False):
+                        logger.info(f"[UNIQUIFY] Skipping disabled method: {method_config.get('name')}")
                         continue
 
                     method_name = method_config.get('name')
                     if method_name not in METHOD_REGISTRY:
-                        logger.warning(f"Unknown method: {method_name}")
+                        logger.warning(f"[UNIQUIFY] Unknown method: {method_name}")
                         continue
 
                     method_func = METHOD_REGISTRY[method_name]
 
                     # Prepare parameters by randomly selecting from ranges
                     params = self._prepare_parameters(method_config)
+                    logger.info(f"[UNIQUIFY] Applying {method_name} with params: {params}")
 
                     # Apply method
                     try:
                         image = method_func(image, **params)
+                        logger.info(f"[UNIQUIFY] Successfully applied {method_name}")
                     except Exception as e:
-                        logger.error(f"Error applying method {method_name}: {e}")
+                        logger.error(f"[UNIQUIFY] Error applying method {method_name}: {e}")
+                        import traceback
+                        logger.error(traceback.format_exc())
                         # Continue with other methods
 
                 # Apply text overlay if needed
