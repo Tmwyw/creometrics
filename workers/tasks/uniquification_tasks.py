@@ -99,7 +99,8 @@ def uniquify_photo_task(
             'success': True,
             'output_paths': [str(p) for p in output_paths],
             'count': len(output_paths),
-            'processing_time': processing_time
+            'processing_time': processing_time,
+            'intensity': intensity
         }
 
     except Exception as e:

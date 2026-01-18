@@ -125,6 +125,7 @@ class TaskManager:
     async def _send_uniquified_photos(self, chat_id: int, message_id: int, result: dict) -> None:
         """Send uniquified photos."""
         output_paths = [Path(p) for p in result.get('output_paths', [])]
+        intensity = result.get('intensity', 'medium')
 
         if not output_paths:
             await self.bot.edit_message_text(
@@ -133,6 +134,14 @@ class TaskManager:
                 text="❌ Не удалось создать уникальные копии."
             )
             return
+
+        # Map intensity to Russian
+        intensity_map = {
+            'low': '🟢 слабая',
+            'medium': '🟡 средняя',
+            'high': '🔴 сильная'
+        }
+        intensity_text = intensity_map.get(intensity, '🟡 средняя')
 
         # Update message
         await self.bot.edit_message_text(
@@ -148,7 +157,7 @@ class TaskManager:
                     await self.bot.send_photo(
                         chat_id=chat_id,
                         photo=photo,
-                        caption=f"📸 Копия {i}/{len(output_paths)}"
+                        caption=f"📸 Копия {i}/{len(output_paths)} - {intensity_text}"
                     )
             except Exception as e:
                 logger.error(f"Error sending photo {photo_path}: {e}")
