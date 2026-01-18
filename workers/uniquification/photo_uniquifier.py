@@ -352,53 +352,52 @@ def create_default_photo_preset() -> Dict[str, Any]:
     """
     return {
         "methods": [
-            # THREE CORE EFFECTS - all applied together, scaled by intensity
-            # Effect 1: NOISE (grain texture like left image)
+            # ONLY THREE CORE EFFECTS - all applied together, scaled by intensity
+            # Effect 1: NOISE (grain texture)
             {
                 "name": "noise",
                 "enabled": True,
                 "intensity": [30, 80]  # Visible grain - scales with intensity
             },
-            # Effect 2: SPARKLES (star points like center image)
+            # Effect 2: SPARKLES (star points)
             {
                 "name": "sparkles",
                 "enabled": True,
                 "count": [60, 150],  # Star count - scales with intensity
                 "size": [4, 10]  # Star size
             },
-            # Effect 3: GLOW (soft light spots like right image)
+            # Effect 3: GLOW (soft light spots)
             {
                 "name": "glow",
                 "enabled": True,
                 "count": [8, 20],  # Glow spots count - scales with intensity
                 "intensity": [0.3, 0.6]  # Glow opacity
             },
-            # SUBTLE ADJUSTMENTS - always minimal, don't interfere with content
+            # ALL OTHER EFFECTS DISABLED - keep it simple
             {
                 "name": "brightness",
-                "enabled": True,
-                "factor": [1.0, 1.03]  # ONLY brighten, NEVER darken (0% to +3%)
+                "enabled": False,
+                "factor": [1.0, 1.03]
             },
             {
                 "name": "contrast",
-                "enabled": True,
-                "factor": [0.98, 1.02]  # Very subtle contrast change (±2%)
+                "enabled": False,
+                "factor": [0.98, 1.02]
             },
             {
                 "name": "hue",
-                "enabled": True,
-                "shift": [-3, 3]  # Minimal color shift (±3 degrees)
+                "enabled": False,
+                "shift": [-3, 3]
             },
             {
                 "name": "blur",
-                "enabled": True,
-                "radius": [0.1, 0.3]  # Barely noticeable blur
+                "enabled": False,
+                "radius": [0.1, 0.3]
             },
-            # DISABLED - too distracting or changes composition
             {
                 "name": "lens_flare",
                 "enabled": False,
-                "intensity": [0.3, 0.7]  # Disabled - creates annoying circles
+                "intensity": [0.3, 0.7]
             },
             {
                 "name": "crop",
