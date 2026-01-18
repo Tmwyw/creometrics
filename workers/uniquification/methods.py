@@ -284,7 +284,8 @@ def random_crop(image: Image.Image, crop_percent: Union[float, Tuple[float, floa
 def add_glow(
     image: Image.Image,
     count: Union[int, Tuple[int, int]] = (5, 15),
-    intensity: Union[float, Tuple[float, float]] = (0.3, 0.6)
+    intensity: Union[float, Tuple[float, float]] = (0.3, 0.6),
+    radius: Union[int, Tuple[int, int]] = (20, 60)
 ) -> Image.Image:
     """Add soft glow spots to image (light blurs, not stars).
 
@@ -292,6 +293,7 @@ def add_glow(
         image: Input image
         count: Number of glow spots
         intensity: Opacity of glow (0.0-1.0)
+        radius: Glow radius range (min, max)
 
     Returns:
         Image with glow spots
@@ -311,8 +313,8 @@ def add_glow(
         x = random.randint(0, width - 1)
         y = random.randint(0, height - 1)
 
-        # Random size
-        radius = random.randint(20, 60)
+        # Random size from config
+        glow_radius = _get_value(radius)
 
         # Random color (warm light colors)
         colors = [
@@ -324,7 +326,7 @@ def add_glow(
 
         # Draw multiple concentric circles for soft glow
         for i in range(5):
-            r = radius - (i * radius // 5)
+            r = glow_radius - (i * glow_radius // 5)
             alpha = int(glow_intensity * 80 / (i + 1))  # Fade out
             color = (*base_color, alpha)
             draw.ellipse(

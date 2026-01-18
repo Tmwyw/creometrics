@@ -359,19 +359,20 @@ def create_default_photo_preset() -> Dict[str, Any]:
                 "enabled": True,
                 "intensity": [30, 80]  # Visible grain - scales with intensity
             },
-            # Effect 2: SPARKLES (star points)
+            # Effect 2: SPARKLES (star points) - SMALL stars
             {
                 "name": "sparkles",
                 "enabled": True,
                 "count": [60, 150],  # Star count - scales with intensity
-                "size": [4, 10]  # Star size
+                "size": [2, 4]  # Small star size (was 4-10)
             },
-            # Effect 3: GLOW (soft light spots)
+            # Effect 3: GLOW (soft light spots) - SUBTLE glows, not bubbles
             {
                 "name": "glow",
                 "enabled": True,
-                "count": [8, 20],  # Glow spots count - scales with intensity
-                "intensity": [0.3, 0.6]  # Glow opacity
+                "count": [5, 12],  # Fewer glow spots (was 8-20)
+                "intensity": [0.2, 0.4],  # Lower opacity (was 0.3-0.6)
+                "radius": [15, 35]  # Smaller radius to avoid bubbles
             },
             # ALL OTHER EFFECTS DISABLED - keep it simple
             {
