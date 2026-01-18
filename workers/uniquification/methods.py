@@ -281,10 +281,68 @@ def random_crop(image: Image.Image, crop_percent: Union[float, Tuple[float, floa
     ))
 
 
+def add_glow(
+    image: Image.Image,
+    count: Union[int, Tuple[int, int]] = (5, 15),
+    intensity: Union[float, Tuple[float, float]] = (0.3, 0.6)
+) -> Image.Image:
+    """Add soft glow spots to image (light blurs, not stars).
+
+    Args:
+        image: Input image
+        count: Number of glow spots
+        intensity: Opacity of glow (0.0-1.0)
+
+    Returns:
+        Image with glow spots
+    """
+    img = image.copy().convert('RGBA')
+    width, height = img.size
+
+    # Create glow layer
+    glow_layer = Image.new('RGBA', (width, height), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(glow_layer, 'RGBA')
+
+    glow_count = _get_value(count)
+    glow_intensity = _get_value(intensity)
+
+    for _ in range(glow_count):
+        # Random position
+        x = random.randint(0, width - 1)
+        y = random.randint(0, height - 1)
+
+        # Random size
+        radius = random.randint(20, 60)
+
+        # Random color (warm light colors)
+        colors = [
+            (255, 255, 255),  # White
+            (255, 255, 200),  # Warm white
+            (255, 240, 200),  # Light yellow
+        ]
+        base_color = random.choice(colors)
+
+        # Draw multiple concentric circles for soft glow
+        for i in range(5):
+            r = radius - (i * radius // 5)
+            alpha = int(glow_intensity * 80 / (i + 1))  # Fade out
+            color = (*base_color, alpha)
+            draw.ellipse(
+                [x - r, y - r, x + r, y + r],
+                fill=color
+            )
+
+    # Composite glow onto image
+    result = Image.alpha_composite(img, glow_layer)
+
+    return result.convert(image.mode)
+
+
 METHOD_REGISTRY = {
     'noise': add_noise,
     'sparkles': add_sparkles,
     'lens_flare': add_lens_flare,
+    'glow': add_glow,
     'rotate': rotate_image,
     'brightness': adjust_brightness,
     'contrast': adjust_contrast,

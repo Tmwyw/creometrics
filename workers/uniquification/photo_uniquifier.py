@@ -343,17 +343,26 @@ def create_default_photo_preset() -> Dict[str, Any]:
     """
     return {
         "methods": [
-            # CORE UNIQUIFICATION - scaled by intensity (low/medium/high)
+            # THREE CORE EFFECTS - all applied together, scaled by intensity
+            # Effect 1: NOISE (grain texture like left image)
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [15, 40]  # Subtle grain texture - scales with intensity
+                "intensity": [30, 80]  # Visible grain - scales with intensity
             },
+            # Effect 2: SPARKLES (star points like center image)
             {
                 "name": "sparkles",
                 "enabled": True,
-                "count": [20, 50],  # Fewer sparkles - scales with intensity
-                "size": [3, 7]  # Smaller sparkles
+                "count": [60, 150],  # Star count - scales with intensity
+                "size": [4, 10]  # Star size
+            },
+            # Effect 3: GLOW (soft light spots like right image)
+            {
+                "name": "glow",
+                "enabled": True,
+                "count": [8, 20],  # Glow spots count - scales with intensity
+                "intensity": [0.3, 0.6]  # Glow opacity
             },
             # SUBTLE ADJUSTMENTS - always minimal, don't interfere with content
             {
