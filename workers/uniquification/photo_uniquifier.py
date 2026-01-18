@@ -344,45 +344,46 @@ def create_default_photo_preset() -> Dict[str, Any]:
     return {
         "methods": [
             {
-                "name": "crop",
-                "enabled": True,
-                "crop_percent": [1, 3]  # Reduced from [2, 5] - less aggressive crop
-            },
-            {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [5, 15]  # Reduced from [50, 120] - much subtler noise
+                "intensity": [2, 5]  # Microscopic noise - invisible but changes hash
             },
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.9, 1.1]  # Reduced from [0.75, 1.25] - subtle brightness change
+                "factor": [0.98, 1.02]  # 2% change - imperceptible to human eye
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.9, 1.1]  # Reduced from [0.75, 1.25] - subtle contrast change
+                "factor": [0.98, 1.02]  # 2% change - imperceptible to human eye
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-10, 10]  # Reduced from [-25, 25] - subtle color shift
+                "shift": [-3, 3]  # 3 degrees - barely noticeable color shift
             },
             {
                 "name": "blur",
                 "enabled": True,
-                "radius": [0.3, 1.0]  # Reduced from [1.0, 2.5] - very subtle blur
+                "radius": [0.1, 0.3]  # Microscopic blur - just enough to change pixels
+            },
+            # DISABLED - too visible and distracting
+            {
+                "name": "crop",
+                "enabled": False,
+                "crop_percent": [1, 3]
             },
             {
                 "name": "sparkles",
-                "enabled": True,
-                "count": [5, 15],  # Reduced from [100, 200] - much fewer sparkles
-                "size": [3, 8]  # Reduced from [8, 15] - smaller sparkles
+                "enabled": False,
+                "count": [5, 15],
+                "size": [3, 8]
             },
             {
                 "name": "lens_flare",
-                "enabled": True,
-                "intensity": [0.2, 0.4]  # Reduced from [0.7, 1.0] - very subtle flare
+                "enabled": False,
+                "intensity": [0.2, 0.4]
             }
         ]
     }
