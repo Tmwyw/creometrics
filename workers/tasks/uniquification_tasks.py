@@ -66,8 +66,9 @@ def uniquify_photo_task(
         if not preset:
             raise ValueError(f"Preset {preset_id} not found")
 
-        # Create uniquifier with additional options
-        config = preset.config.copy()
+        # TEMPORARY: Use fresh default preset instead of DB preset
+        from workers.uniquification.photo_uniquifier import create_default_photo_preset
+        config = create_default_photo_preset()
         config['intensity'] = intensity
         config['file_format'] = file_format
         config['flip_horizontal'] = flip_horizontal
