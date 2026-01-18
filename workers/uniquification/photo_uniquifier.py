@@ -343,47 +343,49 @@ def create_default_photo_preset() -> Dict[str, Any]:
     """
     return {
         "methods": [
+            # CORE UNIQUIFICATION - scaled by intensity (low/medium/high)
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [2, 5]  # Microscopic noise - invisible but changes hash
+                "intensity": [30, 80]  # Visible noise - scales with intensity
             },
+            {
+                "name": "sparkles",
+                "enabled": True,
+                "count": [50, 150],  # Sparkle count - scales with intensity
+                "size": [5, 12]  # Sparkle size
+            },
+            {
+                "name": "lens_flare",
+                "enabled": True,
+                "intensity": [0.3, 0.7]  # Lens flare strength - scales with intensity
+            },
+            # SUBTLE ADJUSTMENTS - always minimal, don't interfere with content
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.98, 1.02]  # 2% change - imperceptible to human eye
+                "factor": [0.97, 1.03]  # Max 3% change - barely noticeable
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.98, 1.02]  # 2% change - imperceptible to human eye
+                "factor": [0.97, 1.03]  # Max 3% change - barely noticeable
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-3, 3]  # 3 degrees - barely noticeable color shift
+                "shift": [-5, 5]  # Max 5 degrees - subtle color shift
             },
             {
                 "name": "blur",
                 "enabled": True,
-                "radius": [0.1, 0.3]  # Microscopic blur - just enough to change pixels
+                "radius": [0.2, 0.5]  # Very subtle blur
             },
-            # DISABLED - too visible and distracting
+            # DISABLED - changes composition
             {
                 "name": "crop",
                 "enabled": False,
                 "crop_percent": [1, 3]
-            },
-            {
-                "name": "sparkles",
-                "enabled": False,
-                "count": [5, 15],
-                "size": [3, 8]
-            },
-            {
-                "name": "lens_flare",
-                "enabled": False,
-                "intensity": [0.2, 0.4]
             }
         ]
     }
