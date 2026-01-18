@@ -168,11 +168,11 @@ class PhotoUniquifier:
         Returns:
             Modified list of method configurations
         """
-        # Intensity multipliers - EXTREME VALUES
+        # Intensity multipliers - subtle to moderate changes
         multipliers = {
-            'low': 1.0,      # Use base values as-is (already strong)
-            'medium': 1.5,   # 50% increase
-            'high': 2.5      # 150% increase
+            'low': 0.5,      # Half of base values for very subtle changes
+            'medium': 1.0,   # Use base values as-is
+            'high': 1.3      # 30% increase for noticeable but not destructive changes
         }
 
         multiplier = multipliers.get(self.intensity, 1.5)
@@ -336,43 +336,43 @@ def create_default_photo_preset() -> Dict[str, Any]:
             {
                 "name": "crop",
                 "enabled": True,
-                "crop_percent": [2, 5]
+                "crop_percent": [1, 3]  # Reduced from [2, 5] - less aggressive crop
             },
             {
                 "name": "noise",
                 "enabled": True,
-                "intensity": [50, 120]
+                "intensity": [5, 15]  # Reduced from [50, 120] - much subtler noise
             },
             {
                 "name": "brightness",
                 "enabled": True,
-                "factor": [0.75, 1.25]
+                "factor": [0.9, 1.1]  # Reduced from [0.75, 1.25] - subtle brightness change
             },
             {
                 "name": "contrast",
                 "enabled": True,
-                "factor": [0.75, 1.25]
+                "factor": [0.9, 1.1]  # Reduced from [0.75, 1.25] - subtle contrast change
             },
             {
                 "name": "hue",
                 "enabled": True,
-                "shift": [-25, 25]
+                "shift": [-10, 10]  # Reduced from [-25, 25] - subtle color shift
             },
             {
                 "name": "blur",
                 "enabled": True,
-                "radius": [1.0, 2.5]
+                "radius": [0.3, 1.0]  # Reduced from [1.0, 2.5] - very subtle blur
             },
             {
                 "name": "sparkles",
                 "enabled": True,
-                "count": [100, 200],
-                "size": [8, 15]
+                "count": [5, 15],  # Reduced from [100, 200] - much fewer sparkles
+                "size": [3, 8]  # Reduced from [8, 15] - smaller sparkles
             },
             {
                 "name": "lens_flare",
                 "enabled": True,
-                "intensity": [0.7, 1.0]
+                "intensity": [0.2, 0.4]  # Reduced from [0.7, 1.0] - very subtle flare
             }
         ]
     }
