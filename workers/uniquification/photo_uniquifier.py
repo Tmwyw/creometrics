@@ -136,13 +136,13 @@ class PhotoUniquifier:
         return output_paths
 
     def _prepare_parameters(self, method_config: Dict[str, Any]) -> Dict[str, Any]:
-        """Prepare parameters for a method by selecting random values from ranges.
+        """Prepare parameters for a method - pass ranges as tuples.
 
         Args:
             method_config: Method configuration
 
         Returns:
-            Dictionary of parameters
+            Dictionary of parameters with ranges as tuples
         """
         params = {}
 
@@ -150,13 +150,9 @@ class PhotoUniquifier:
             if key in ['name', 'enabled']:
                 continue
 
-            # If value is a list with 2 elements, treat as range
+            # If value is a list with 2 elements, convert to tuple (methods expect ranges)
             if isinstance(value, list) and len(value) == 2:
-                # Determine if range is for int or float
-                if all(isinstance(v, int) for v in value):
-                    params[key] = random.randint(value[0], value[1])
-                else:
-                    params[key] = random.uniform(float(value[0]), float(value[1]))
+                params[key] = tuple(value)
             else:
                 # Use value as-is
                 params[key] = value
